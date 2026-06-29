@@ -633,7 +633,29 @@ def write_mobile_index():
 
             // Search filter
             if (searchKeyword) {
-                filtered = filtered.filter(p => p.title && p.title.toLowerCase().includes(searchKeyword));
+                const queryWords = searchKeyword.toLowerCase().split(/\s+/).filter(Boolean);
+                filtered = filtered.filter(p => {
+                    const postComments = db.comments[p.id] || [];
+                    const commentsText = postComments.map(c => (c.text || '') + ' ' + (c.name || '')).join(' ').toLowerCase();
+                    
+                    const title = (p.title || '').toLowerCase();
+                    const category = (p.category || '').toLowerCase();
+                    const author = (p.author || '').toLowerCase();
+                    const idStr = String(p.id);
+
+                    return queryWords.every(word => {
+                        if (title.includes(word) || category.includes(word) || author.includes(word) || commentsText.includes(word) || idStr === word) {
+                            return true;
+                        }
+                        
+                        const titleWords = title.split(/[^a-zA-Z0-9а-яА-ЯёЁ]+/).filter(w => w.length >= 3);
+                        if (titleWords.some(tw => word.includes(tw) || tw.includes(word))) {
+                            return true;
+                        }
+                        
+                        return false;
+                    });
+                });
             }
 
             // Sort
