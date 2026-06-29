@@ -197,6 +197,7 @@ export default function App() {
   const bindLongPress = (post, onClick) => {
     let timer = null;
     let isLongPress = false;
+    let hasMoved = false;
     let startCoords = { x: 0, y: 0 };
     let isTouch = false;
 
@@ -210,6 +211,7 @@ export default function App() {
       }
 
       isLongPress = false;
+      hasMoved = false;
       const touch = e.touches ? e.touches[0] : e;
       startCoords = { x: touch.clientX, y: touch.clientY };
       
@@ -229,19 +231,20 @@ export default function App() {
         return;
       }
 
-      if (!isLongPress && onClick) {
+      if (!isLongPress && !hasMoved && onClick) {
         onClick(e);
       }
     };
 
     const move = (e) => {
-      if (timer) {
+      if (timer || hasMoved === false) {
         const touch = e.touches ? e.touches[0] : e;
         const dx = touch.clientX - startCoords.x;
         const dy = touch.clientY - startCoords.y;
         // Cancel long press if finger moved more than 10px (scrolling)
         if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
-          clearTimeout(timer);
+          hasMoved = true;
+          if (timer) clearTimeout(timer);
         }
       }
     };
@@ -823,7 +826,7 @@ export default function App() {
 
     // Hide missing images filter
     if (hideMissingImages) {
-      result = result.filter((p) => p.filename && p.filename.endsWith('.webp'));
+      result = result.filter((p) => p.filename && p.filename.endsWith('.webp') && p.image_exists);
     }
 
     // Sort (only if we're not inside history tab)

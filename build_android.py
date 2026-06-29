@@ -33,8 +33,12 @@ def export_database():
                 base_name, _ = os.path.splitext(filename)
                 filename = f"{base_name}.webp"
             post_dict['filename'] = filename
+            # Check if WebP file exists on disk
+            webp_path = os.path.join(UPLOAD_DIR, filename)
+            post_dict['image_exists'] = os.path.exists(webp_path)
         else:
             post_dict['filename'] = None
+            post_dict['image_exists'] = False
         posts.append(post_dict)
         
     # 2. Fetch all comments
