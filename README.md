@@ -1,5 +1,7 @@
+<br>
+
 <p align="center">
-  <img src="assets/brand/icon.png" width="128" height="128" alt="Comicsbook.ru Logo"/>
+  <img src="assets/brand/icon.png" width="110" height="110" alt="Comicsbook.ru Logo"/>
 </p>
 
 <h1 align="center">Comicsbook.ru Archive & Museum</h1>
@@ -9,19 +11,27 @@
 </p>
 
 <p align="center">
-  <a href="DONATION.md"><img src="https://img.shields.io/badge/Sponsor-Buy%20Me%20a%20Coffee-ff69b4?style=flat&logo=ko-fi&logoColor=white" alt="Sponsor"/></a>
-  <img src="https://img.shields.io/badge/Status-Archival-blue" alt="Status"/>
-  <img src="https://img.shields.io/badge/Platform-Android%20%7C%20Web-success" alt="Platform"/>
-  <img src="https://img.shields.io/badge/License-MIT-lightgrey" alt="License"/>
+  <a href="DONATION.md"><img src="https://img.shields.io/badge/Sponsor-Buy%20Me%20a%20Coffee-ff69b4?style=flat-square&logo=ko-fi&logoColor=white" alt="Sponsor"/></a>
+  <img src="https://img.shields.io/badge/Status-Archival-blue?style=flat-square" alt="Status"/>
+  <img src="https://img.shields.io/badge/Platform-Android%20%7C%20Web-success?style=flat-square" alt="Platform"/>
+  <img src="https://img.shields.io/badge/License-MIT-lightgrey?style=flat-square" alt="License"/>
 </p>
 
+<br>
+
 ---
+
+<br>
 
 Этот проект представляет собой некоммерческую инициативу по архивации и сохранению контента некогда популярного российского развлекательного ресурса **Comicsbook.ru**, закрывшегося много лет назад. 
 
 Репозиторий объединяет в себе комплекс скриптов для парсинга исторического наследия сайта из веб-архивов (Wayback Machine), классическую серверную версию портала для локального компьютера, а также мобильное приложение для Android с поддержкой оффлайн-режима.
 
+<br>
+
 ---
+
+<br>
 
 ## Готовые сборки (Releases)
 
@@ -29,7 +39,23 @@
 
 В разделе **[Releases](https://github.com/RandoTeam/comicsbook.ru-archive/releases)** доступны предсобранные мобильные пакеты (`.apk`) со встроенной оптимизированной базой данных и архивом изображений.
 
+<br>
+
 ---
+
+<br>
+
+## 📱 Ключевые возможности
+
+| ⚡ Оффлайн-режим | 🎨 Кастомизация | 📂 Организация |
+| :--- | :--- | :--- |
+| База данных и картинки полностью вшиты в сборку. Никаких внешних запросов при чтении. | Темная, Светлая и OLED темы с сохранением состояния и плавной анимацией. | Создание собственных папок в Избранном для удобной группировки мемов. |
+
+<br>
+
+---
+
+<br>
 
 ## Архитектура проекта
 
@@ -52,9 +78,9 @@
 ### 4. Автоматизация сборки
 * **`build_android.py`**: Единый скрипт оркестрации сборки. Он компилирует React-код, экспортирует реляционную SQLite базу данных в формат `data.json` для оффлайн-чтения, переносит оптимизированные изображения в директорию Cordova и запускает сборку релизного подписанного Android-пакета (`.apk`).
 
----
-
-## Инструкции по развертыванию
+<details>
+<summary><b>🔧 Инструкции по развертыванию и сборке (для разработчиков)</b></summary>
+<br>
 
 ### Настройка локального сервера Flask (для ПК)
 
@@ -91,6 +117,9 @@
 python build_android.py
 ```
 Скрипт автоматически подготовит веб-дистрибутив, перенесет изображения из локальной папки `upload/` в ресурсы Cordova, экспортирует записи базы данных и скомпилирует подписанный `.apk` файл.
+</details>
+
+<br>
 
 ---
 
