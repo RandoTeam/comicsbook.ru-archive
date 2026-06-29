@@ -39,8 +39,13 @@ const Icons = {
     </svg>
   ),
   Random: (props) => (
-    <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" {...props}>
-      <path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/>
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <rect x="3" y="3" width="18" height="18" rx="3" ry="3" />
+      <circle cx="8" cy="8" r="1.5" fill="currentColor" />
+      <circle cx="16" cy="16" r="1.5" fill="currentColor" />
+      <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+      <circle cx="8" cy="16" r="1.5" fill="currentColor" />
+      <circle cx="16" cy="8" r="1.5" fill="currentColor" />
     </svg>
   ),
   Comments: (props) => (
@@ -158,6 +163,7 @@ export default function App() {
       return [];
     }
   });
+  const [randomPost, setRandomPost] = useState(null);
 
   useEffect(() => {
     localStorage.setItem('hiddenPosts', JSON.stringify(hiddenPosts));
@@ -557,6 +563,14 @@ export default function App() {
     
     setActiveTab(newTab);
     
+    // Auto-select a random post if opening the random tab and none is selected yet
+    if (newTab === 'random' && !randomPost) {
+      if (posts.length > 0) {
+        const randIndex = Math.floor(Math.random() * posts.length);
+        setRandomPost(posts[randIndex]);
+      }
+    }
+    
     // Restore display count or default
     const savedDisplayCount = displayCounts.current[newTab] || 10;
     setDisplayCount(savedDisplayCount);
@@ -566,6 +580,13 @@ export default function App() {
     setTimeout(() => {
       window.scrollTo(0, scrollPositions.current[newTab] || 0);
     }, 50);
+  };
+
+  const selectNewRandomPost = () => {
+    if (posts.length === 0) return;
+    const randIndex = Math.floor(Math.random() * posts.length);
+    setRandomPost(posts[randIndex]);
+    window.scrollTo(0, 0);
   };
 
   // Add post to history
@@ -698,7 +719,7 @@ export default function App() {
   // Filter and sort posts
   const getFilteredPosts = () => {
     let result = [];
-    if (activeTab === 'feed') {
+    if (activeTab === 'feed' || activeTab === 'search') {
       result = posts.filter(p => !hiddenPosts.includes(p.id));
     } else if (activeTab === 'favorites') {
       if (activeFolderId === 'all') {
@@ -864,8 +885,10 @@ export default function App() {
               ? 'Категории'
               : activeTab === 'favorites'
               ? 'Избранное'
-              : activeTab === 'history'
-              ? 'История просмотров'
+              : activeTab === 'search'
+              ? 'Поиск мемов'
+              : activeTab === 'random'
+              ? 'Случайный мем'
               : 'Настройки'}
           </div>
         )}
@@ -877,34 +900,19 @@ export default function App() {
           >
             <Icons.Music />
           </button>
-          {!selectedPost && (activeTab === 'feed' || activeTab === 'favorites') && (
+          {!selectedPost && activeTab !== 'search' && (
             <button
               className="header-btn"
-              onClick={() => {
-                setShowSearch(!showSearch);
-                if (showSearch) setSearchKeyword('');
-              }}
+              onClick={() => handleTabChange('search')}
             >
               <Icons.Search />
             </button>
           )}
-          <button className="header-btn" onClick={triggerRandom}>
-            <Icons.Random />
-          </button>
         </div>
       </header>
 
       {/* Main content wrapper */}
       <div className="wrapper" style={{ marginTop: headerVisible ? '0' : '-48px', transition: 'margin-top 0.3s ease' }}>
-        {/* Collapsible Search */}
-        <div className={`search-box ${showSearch ? 'visible' : ''}`}>
-          <input
-            type="text"
-            placeholder="Поиск по названию или теме..."
-            value={searchKeyword}
-            onChange={(e) => setSearchKeyword(e.target.value)}
-          />
-        </div>
 
         {loading ? (
           <div className="loader-container">
@@ -999,11 +1007,29 @@ export default function App() {
           </div>
         ) : (
           <>
-            {/* Feed / Bookmarks / History Pages */}
+            {/* Feed / Bookmarks / Search Pages */}
             {(activeTab === 'feed' ||
               activeTab === 'favorites' ||
-              activeTab === 'history') && (
+              activeTab === 'search') && (
               <div>
+                {/* Dedicated Search Input Bar on Search tab */}
+                {activeTab === 'search' && (
+                  <div className="search-tab-bar" style={{ padding: '12px 16px', background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '12px', marginBottom: '16px' }}>
+                    <input
+                      type="text"
+                      placeholder="Поиск по названию, автору, комментариям..."
+                      value={searchKeyword}
+                      onChange={(e) => setSearchKeyword(e.target.value)}
+                      style={{ width: '100%', padding: '12px 16px', border: '1px solid var(--border-color)', borderRadius: '24px', boxSizing: 'border-box', background: 'var(--bg-color)', color: 'var(--text-color)', fontSize: '15px', outline: 'none' }}
+                      autoFocus
+                    />
+                    {searchKeyword && (
+                      <div style={{ marginTop: '8px', fontSize: '13px', color: 'var(--text-secondary)', textAlign: 'right' }}>
+                        Найдено мемов: {filteredPosts.length}
+                      </div>
+                    )}
+                  </div>
+                )}
                 {/* Categories Badge on Feed & Sort Bar */}
                 {activeTab === 'feed' && (
                   <div className="sub-bar">
@@ -1290,6 +1316,90 @@ export default function App() {
               </div>
             )}
 
+            {/* Random Meme Page */}
+            {activeTab === 'random' && randomPost && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', paddingBottom: '30px' }}>
+                <button
+                  onClick={selectNewRandomPost}
+                  className="sort-btn"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    padding: '12px 20px',
+                    background: 'var(--tab-active)',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '24px',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+                    alignSelf: 'center',
+                    fontSize: '15px'
+                  }}
+                >
+                  🎲 Другой случайный мем
+                </button>
+
+                <div className="item" key={randomPost.id}>
+                  <header>
+                    <div className="ava">
+                      <img src={getCatGif(randomPost.category)} alt="" />
+                    </div>
+                    <div className="text" style={{ flex: 1 }}>
+                      <h2>{randomPost.category}</h2>
+                      <h3>{randomPost.title || 'Без названия'}</h3>
+                      <div className="meta-info">
+                        Добавил: {randomPost.author || 'Аноним'} •{' '}
+                        {randomPost.date_str || 'Архив'}
+                      </div>
+                    </div>
+                  </header>
+
+                  <section style={{ cursor: 'pointer' }}>
+                    <img 
+                      src={`upload/${randomPost.filename}`} 
+                      onError={(e) => handleImageError(e, randomPost)} 
+                      alt="" 
+                      {...bindLongPress(randomPost, () => setFullscreenPost(randomPost))}
+                    />
+                  </section>
+
+                  <footer>
+                    <div className="footer-btn-group">
+                      <div
+                        className="footer-btn"
+                        onClick={() => setSelectedPost(randomPost)}
+                      >
+                        <Icons.Comments />
+                        <span style={{ marginLeft: '4px' }}>Комментарии ({(comments[randomPost.id] || []).length})</span>
+                      </div>
+                      <div
+                        className={`footer-btn ${favorites.includes(randomPost.id) ? 'active-saved' : ''}`}
+                        onClick={() => {
+                          if (folders.length > 0) {
+                            setSaveToFolderPost(randomPost);
+                          } else {
+                            toggleFavorite(randomPost.id);
+                          }
+                        }}
+                      >
+                        <Icons.Favorites />
+                      </div>
+                    </div>
+                    <div className="rate">
+                      <span onClick={() => handleRate(randomPost.id, 'dislike')} style={{ color: (likes[randomPost.id] || 0) === -1 ? 'red' : 'inherit', cursor: 'pointer', padding: '0 5px' }}>–</span>
+                      <p style={{ margin: '0 10px', color: (likes[randomPost.id] || 0) !== 0 ? 'var(--tab-active)' : 'inherit', fontWeight: 'bold' }}>
+                        {(randomPost.rating || 0) + (likes[randomPost.id] || 0)}
+                      </p>
+                      <span onClick={() => handleRate(randomPost.id, 'like')} style={{ color: (likes[randomPost.id] || 0) === 1 ? 'green' : 'inherit', cursor: 'pointer', padding: '0 5px' }}>+</span>
+                    </div>
+                  </footer>
+                </div>
+              </div>
+            )}
+
             {/* Settings Page */}
             {activeTab === 'settings' && (
               <div style={{ paddingBottom: '30px' }}>
@@ -1443,18 +1553,25 @@ export default function App() {
           <span className="label">Категории</span>
         </div>
         <div
+          className={`nav-tab ${activeTab === 'search' ? 'active' : ''}`}
+          onClick={() => handleTabChange('search')}
+        >
+          <Icons.Search />
+          <span className="label">Поиск</span>
+        </div>
+        <div
+          className={`nav-tab ${activeTab === 'random' ? 'active' : ''}`}
+          onClick={() => handleTabChange('random')}
+        >
+          <Icons.Random />
+          <span className="label">Рандом</span>
+        </div>
+        <div
           className={`nav-tab ${activeTab === 'favorites' ? 'active' : ''}`}
           onClick={() => handleTabChange('favorites')}
         >
           <Icons.Favorites />
           <span className="label">Избранное</span>
-        </div>
-        <div
-          className={`nav-tab ${activeTab === 'history' ? 'active' : ''}`}
-          onClick={() => handleTabChange('history')}
-        >
-          <Icons.History />
-          <span className="label">История</span>
         </div>
         <div
           className={`nav-tab ${activeTab === 'settings' ? 'active' : ''}`}
