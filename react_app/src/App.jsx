@@ -129,6 +129,8 @@ export default function App() {
   // App UI state
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const audioRef = useRef(null);
+  const playlist = ['audio/space1.mp3', 'audio/space2.mp3', 'audio/space3.mp3'];
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [showExitToast, setShowExitToast] = useState(false);
   const backPressTime = useRef(0);
   const [activeTab, setActiveTab] = useState(() => localStorage.getItem('activeTab') || 'feed');
@@ -280,15 +282,27 @@ export default function App() {
   // Audio Play toggle
   const toggleMusic = () => {
     if (audioRef.current) {
+      audioRef.current.volume = 0.2; // Низкая громкость
       if (isMusicPlaying) {
         audioRef.current.pause();
         setIsMusicPlaying(false);
       } else {
-        audioRef.current.play();
+        audioRef.current.play().catch(e => console.log(e));
         setIsMusicPlaying(true);
       }
     }
   };
+
+  const handleTrackEnded = () => {
+    setCurrentTrackIndex((prev) => (prev + 1) % playlist.length);
+  };
+
+  useEffect(() => {
+    if (isMusicPlaying && audioRef.current) {
+      audioRef.current.volume = 0.2;
+      audioRef.current.play().catch(e => console.log(e));
+    }
+  }, [currentTrackIndex]);
 
   // Sync state with local storage
   useEffect(() => {
@@ -682,7 +696,7 @@ export default function App() {
 
   return (
     <div className={`app-container font-${fontSize}`}>
-      <audio ref={audioRef} loop src="audio/space.mp3" />
+      <audio ref={audioRef} src={playlist[currentTrackIndex]} onEnded={handleTrackEnded} />
       <Toast message="Нажмите еще раз для выхода" show={showExitToast} onHide={() => setShowExitToast(false)} />
 
       {/* Scroll Progress Bar */}
