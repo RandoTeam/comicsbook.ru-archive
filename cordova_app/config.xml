@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="ru.comicsbook.app" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>Comicsbook</name>
+    <description>
+        Comicsbook.ru offline meme archive.
+    </description>
+    <author email="dev@comicsbook.ru" href="http://comicsbook.ru">
+        Comicsbook Team
+    </author>
+    <content src="index.html" />
+    <icon src="icon.png" />
+    <allow-intent href="http://*/*" />
+    <allow-intent href="https://*/*" />
+    <preference name="StatusBarOverlaysWebView" value="false" />
+    <preference name="StatusBarBackgroundColor" value="#2b587a" />
+    <preference name="StatusBarStyle" value="lightcontent" />
+    <plugin name="cordova-plugin-statusbar" />
+</widget>

@@ -1,0 +1,31 @@
+node_modules/
+platforms/
+plugins/
+dist/
+build/
+.gradle/
+.idea/
+.DS_Store
+*.apk
+*.keystore
+*.db
+*.sqlite
+*.log
+__pycache__/
+
+# Ignore the heavy image folders
+upload/
+cordova_app/www/upload/
+
+# Ignore React App build output
+react_app/dist/
+react_app/node_modules/
+
+# Ignore Cordova auto-generated
+cordova_app/plugins/
+cordova_app/platforms/
+cordova_app/node_modules/
+
+# Ignore generated database json
+cordova_app/www/data.json
+react_app/public/data.json

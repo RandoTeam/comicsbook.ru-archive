@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<!-- saved from url=(0015)https://r01.ru/ -->
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><script type="text/javascript" async="" src="./index_files/watch.js"></script>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+<title>Парковочная страница R01</title>
+<meta name="description" content="Парковочная страница R01">
+<link href="./index_files/style.css" type="text/css" rel="stylesheet">
+<link href="./index_files/styles.css" type="text/css" rel="stylesheet">
+<link href="./index_files/template_styles.css" type="text/css" rel="stylesheet">
+<meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+<meta http-equiv="pragma" content="no-cache">
+<style type="text/css">
+
+pre * {
+	font-family:monospace!important;
+}
+
+.newsdata {
+	color:#aaa;
+	font-size:11px;
+	border-bottom:1px dashed #ddd;
+	padding-bottom:.5em;
+	width:90%;
+	display:block;
+}
+
+* {
+	outline:none !important;
+}
+.logo, .logo_light {
+	width:124px;
+	height:94px;
+	float: left;
+}
+.logo {
+	background:url(/bitrix/r01images/rd/logo.png) center;
+}
+.logo_light {
+	background:url(/bitrix/r01images/rd/logo_light.png) center;
+}
+th > a {
+	background:url(/bitrix/r01images/rd/arrow.png) no-repeat left center;
+	padding-left:1em !important;
+}
+.colla {
+	display:none;
+}
+.controlpanel * {
+	padding: .4em .5em .4em .5em !important;
+	font-size:11px !important;
+	white-space:nowrap;
+	text-align:left;
+}
+form {
+	padding:0px;
+	margin:0px;
+}
+.gray {
+	color:#555;
+}
+p.small {
+	margin:0;
+	padding:1em;
+}
+.content {
+	background:url(/bitrix/r01images/rd/content_bg.jpg) repeat-x top #e9e9e9;
+	border-left:2px solid #d7d7d7;
+	padding:1.4em 1em .4em 1em;
+}
+.content b {
+	font-weight:bold;
+}
+.container, .container > * {
+}
+h1, h2, h3 {
+	font:bold 18px tahoma!important;
+}
+h1 *, h2 *, h3 * {
+	font:bold 18px tahoma!important;
+}
+.divider {
+	width:90%;
+	height:1px;
+	background:#ccc;
+	margin:1em 0 1em 0;
+}
+hr {
+	height:1px;
+	background:#bbb;
+	border:none;
+}
+
+.search input[type='text'] {
+	height:25px;
+	line-height:26px;
+	vertical-align:middle;
+	border:1px solid #b1b1b1;
+	background:url(/bitrix/r01images/rd/input_bg.jpg) repeat-x bottom;
+	color:#999;
+	border-right:none;
+	padding:0 .3em 0 .3em;
+}
+.search input[type='text']:hover, .search input[type='text']:active {
+	color:#000;
+}
+.oplata b {
+	font-weight:bold;
+}
+.oplata a {
+	color:gray;
+	text-decoration:underline;
+}
+.oplata {
+	margin:1em;
+	text-align:center;
+}
+.online {
+	margin:1em;
+	text-align:center;
+	background:#f3f3f3;
+	border:2px solid #fff;
+	border-radius:4px;
+}
+.stable b {
+	font-weight:bold;
+}
+.stable p {
+	text-align:left;
+}
+
+a {
+	text-decoration:none;
+	color:#008ae0;
+}
+body {
+	margin:0;
+	padding:0;
+	background:url(/bitrix/r01images/rd/bg_top.jpg) repeat-x top center #e9e9e9;
+}
+body, body * {
+	font:normal 12px Verdana, Geneva, sans-serif;
+}
+.act a, .noact a {
+	width:187px !important;
+	height:26px !important;
+	line-height:26px !important;
+	vertical-align:middle !important;
+	margin:0 !important;
+	padding:0 !important;
+	display:inline-block;
+	text-align:center;
+	font:bold 12px verdana;
+}
+.act * {
+	background:url(/bitrix/r01images/topmenu_act.png) no-repeat center bottom;
+}
+.noact * {
+	background:url(/bitrix/r01images/topmenu.png) no-repeat center bottom;
+}
+.act a {
+	color:#000;
+}
+.noact a {
+	color:#fff;
+}
+.menutop, .menutop * {
+	color:#000000;
+	font:bold 12px verdana;
+	border-collapse:collapse;
+	height:39px;
+	text-align:center;
+	white-space:nowrap;
+	cursor:pointer;
+}
+.small, .small * {
+	font-size:11px !important;
+}
+.left, .right, .blueleft, .blueright {
+	width:6px;
+	padding:0 !important;
+}
+.left {
+	background:url(/bitrix/r01images/rd/menu_white_left.jpg) no-repeat center;
+}
+.right {
+	background:url(/bitrix/r01images/rd/menu_white_right.jpg) no-repeat center;
+}
+.blueleft {
+	background:url(/bitrix/r01images/rd/menu_blue_left.jpg) no-repeat center;
+}
+.blueright {
+	background:url(/bitrix/r01images/rd/menu_blue_right.jpg) no-repeat center;
+}
+.white {
+	background:url(/bitrix/r01images/rd/menu_white_bg.jpg) repeat-x center;
+}
+.white.border {
+	border-right:1px solid #028cd4;
+}
+.blue {
+	background:url(/bitrix/r01images/rd/menu_blue_bg.jpg) repeat-x center;
+	cursor:default;
+}
+.shadow {
+	box-shadow: 1px 1px 3px rgba(0, 0, 0, .1);
+ filter:
+ progid:DXImageTransform.Microsoft.dropshadow(OffX=0, OffY=1, Color='#19000000'), progid:DXImageTransform.Microsoft.dropshadow(OffX=1, OffY=2, Color='#19000000');
+}
+.shadow * {
+	box-shadow:none;
+	filter:none;
+}
+table.stable, table.itable {
+	border-collapse:collapse;
+	-moz-border-radius:6px;
+	-khtml-border-radius:6px;
+	-webkit-border-radius:6px;
+	text-decoration:none;
+	border:none!important;
+	background-color:#fdfdfd;
+}
+.stable td, .itable td, .forum-main td {
+	border:1px solid #dddddd;
+}
+.content td {
+	text-align:left;
+	padding:.4em .7em .4em .7em;
+	font:normal 12px verdana;
+	text-decoration:none;
+}
+
+input[type='submit'] {
+	border:1px solid #bbb;
+	background:url(/bitrix/r01images/rd/button.jpg) repeat-x bottom center;
+	border-radius:4px;
+	padding: 0em 1em 0em;
+	overflow: visible;
+	margin: 0px;
+	cursor: pointer;
+	white-space: nowrap;
+	outline: none;
+	color: #240909;
+	text-shadow:0 1px 0 #FFF;
+	display: inline-block;
+}
+input[type='submit']:hover {
+	background:url(/bitrix/r01images/rd/button.jpg) repeat-x bottom -2px center;
+	border:1px solid #aaa;
+}
+input[type='submit']:active {
+	background:url(/bitrix/r01images/rd/button.jpg) repeat-x bottom -12px center;
+	border:1px solid #666;
+}
+.stable th > *, .stable th, th, th > *, .itable th {
+	color:#ffffff;
+	text-shadow:none;
+	padding:.3em;
+	text-shadow:0px 0 1px #111111;
+}
+.nobordered td, .nobordered th {
+	border:none;
+}
+table.inner {
+	border:8px solid #ffffff!important;
+	border-collapse:collapse;
+	-moz-border-radius:0;
+	-khtml-border-radius:0;
+	-webkit-border-radius:0;
+	box-shadow:none;
+	filter:none;
+}
+.border1px td, .border1px th {
+	border:1px solid #dddddd;
+	padding:.3em;
+}
+.vmiddle, .vmiddle * {
+	vertical-align:middle;
+}
+.gmiddle, .gmiddle * {
+	text-align:center !important;
+}
+.checkbox, .checkbox * {
+	font:normal 11px Verdana, Geneva, sans-serif;
+	line-height:22px;
+	vertical-align:middle;
+	white-space:nowrap;
+	text-decoration:none;
+	padding:0;
+	margin:0;
+	display:inline-block;
+ 	*display:inline;
+}
+
+.td_gray th {
+	background:#d7d7d7 !important;
+	height:34px !important;
+	padding-left:5px !important;
+	padding-right:5px !important;
+	text-align:center !important;
+	color: #000 !important;
+	text-shadow:none;
+	font-weight:bold;
+	border:1px solid #fff;
+}
+
+.td_gray td {
+	border:1px solid #fff !important;
+}
+
+.td_gray tr:nth-child(2n) {
+    background: #f0f0f0 !important;
+} 
+
+
+.td_blue_left, th:first-child {
+	height:34px !important;
+	text-align:left;
+	padding-left:14px !important;
+}
+.td_lightblue_right {
+	border:none !important;
+	background:#00a9ec !important;
+	height:34px !important;
+	padding-right:14px !important;
+	text-align:right !important;
+}
+.td_lightblue_left {
+	border:none !important;
+	background:#00a9ec !important;
+	height:34px !important;
+	padding-left:14px !important;
+	text-align:left !important;
+}
+.td_red_right {
+	border:none !important;
+	background:#ff5c43 !important;
+	height:34px !important;
+	padding-right:14px !important;
+	text-align:right !important;
+}
+.td_red_left {
+	border:none !important;
+	background:#ff5c43 !important;
+	height:34px !important;
+	padding-left:14px !important;
+	text-align:left !important;
+}
+
+td:first-child, th:first-child {
+	border-left:none !important;
+}
+
+td:last-child, th:last-child {
+	border-right:none !important;
+}
+
+.td_blue_right, th:last-child {
+	height:34px !important;
+	padding-right:14px !important;
+}
+table {
+	border-collapse:collapse;
+	border-spacing:0;
+}
+th {
+	border-spacing:0;
+	border:1px solid #0150b1;
+	background-color:#0471c3;
+}
+.td_shadow_gray_top {
+ //background:url(/bitrix/r01images/rd/td_shadow_gray_top.jpg) repeat-x top;
+	min-height:30px;
+}
+.news {
+	padding:.2em;
+	-webkit-border-bottom-right-radius: 6px;
+	-webkit-border-bottom-left-radius: 6px;
+	-moz-border-radius-bottomright: 6px;
+	-moz-border-radius-bottomleft: 6px;
+	border-bottom-right-radius: 6px;
+	border-bottom-left-radius: 6px;
+	background:url(/bitrix/r01images/rd/news_bg.jpg) repeat-x top center #f5f5f5;
+}
+.news, .news * {
+	font-size:11px;
+	list-style-type:none;
+}
+.newsbody {
+	margin:0 1em 0 1em;
+	margin-bottom:1.2em;
+	padding-bottom:1em;
+	border-bottom:1px dashed #aaa;
+}
+.newsbody img {
+	display:none;
+}
+.newsbody b {
+	font:bold 11px verdana;
+}
+.newsbody a {
+	margin-bottom:11em;
+	font:bold 12px verdana !important;
+}
+.data {
+	margin:0 1em 0 1em;
+	font:normal 11px monospace;
+	color:#999;
+}
+.menu {
+	list-style-type:none;
+	margin-left:0 !important;
+	padding:0 !important;
+}
+.menu li, .menu li > * {
+	display:block;
+	list-style-type:none;
+	margin:0;
+	text-shadow:0 1px 0 #eee;
+	color:#333;
+	padding:.2em 0 .3em .7em !important;
+	font:normal 11px verdana;
+}
+.menuselected {
+	background:url(/bitrix/r01images/rd/leftmenu_bg.jpg) no-repeat left top;
+}
+.menuselected a {
+	font-weight:bold;
+	text-shadow:none;
+}
+
+/* Banner on main page */
+
+.b-mainpage__banner {
+	background: url(/bitrix/r01images/banner_r01.jpg) no-repeat;
+	background-size: cover;
+	box-sizing: border-box;
+	color: #fff;
+	font-family: Verdana;
+	min-height: 369px;
+	padding: 84px 67px 55px 67px;
+	width: 100%;
+}
+
+.b-bdescript__smalltext {
+	font-size: 14px;
+	line-height: 22px;
+	margin: 0;
+}
+
+.b-bdescript__bigtext {
+	font-size: 40px;
+	font-weight: bold;
+	margin: 0;
+}
+
+.b-promolist {
+	list-style: none;
+	margin-top: 72px;
+	padding: 0;
+}
+
+.b-promolist__service {
+	box-sizing: border-box;		
+	max-width: 170px;	
+}
+
+.b-promolist__service--dns {
+	background: url(/bitrix/r01images/dns_banner.png) 0 50% no-repeat;
+	margin-left: 64px;
+	padding-left: 80px;
+}
+
+.b-promolist__service--auct {
+	background: url(/bitrix/r01images/auct.png) 0 50% no-repeat;
+	margin-left: 10px;
+	padding-left: 58px;
+}
+
+.b-promolist__link {
+	border: 2px solid #fff;
+	color: #fff;
+	display: inline-block;
+	font-weight: bold;
+	opacity: 0.9;
+	padding: 14px 22px;
+}
+
+.b-promolist__link:hover {
+	opacity: 1;
+}
+
+.g-col2 {
+	width: 50%;
+}
+
+.g-col3 {
+	width: 33%;
+}
+
+.g-col5 {
+	width: 20%;
+}
+
+.g-col8 {
+	width: 13%;
+}
+
+.g-left {
+	float: left;
+}
+
+.g-bold {
+	font-weight: bold;
+}
+
+.g-font10 {
+	font-size: 10px;
+}
+
+.g-centertext {
+	text-align: center;
+}
+
+.clearfix:after {
+	clear: both;
+	content: "";
+	display: block;
+	height: 0;
+}
+
+/* END OF Banner on main page */
+
+/* PARNTER */
+
+.b-partner__tariffs {
+	box-sizing: border-box;	
+	list-style: none;
+	margin: 0;
+	min-width: 980px;
+	padding: 0;
+	width: 95%;
+}
+
+.b-tariffs__tariff {
+	border: 2px solid transparent;
+	box-sizing: border-box;	
+}
+
+.b-tariff--first {
+	padding-right: 18px;
+}
+
+.b-tariff__minheight40 {
+	min-height: 40px;
+}
+
+.b-tariff--orangeborder {
+	border: 2px solid #fa4e33;
+}
+
+.b-tariff__pad20 {
+	padding: 20px 0;
+}
+
+.g-orangetext {
+	color: #fa4e33;
+}
+
+.g-greytext {
+	color: #a3a3a3;
+}
+
+.g-darkgreyback {
+	background: #e4e4e4;
+}
+
+.b-servlist__service {
+	padding: 70px 62px 0 62px;
+}
+
+.b-servlist {
+	list-style: none;
+	margin: 60px 0 0 0;
+	padding: 0;
+}
+
+.b-partservices {
+	width: 95%;
+}
+
+.b-servlist__service {
+	box-sizing: border-box;
+}
+
+.b-servlist__service--dns {
+	background: url(/bitrix/r01images/dns_orange.png) 50% 0 no-repeat;
+}
+
+.b-servlist__service--auct {
+	background: url(/bitrix/r01images/auct_orange.png) 50% 0 no-repeat;
+}
+
+.rub {
+	background: url(/bitrix/r01images/rub.png) no-repeat;
+	display: inline-block;
+	height: 30px;
+	width: 28px;
+}
+
+.attention__p {
+    min-height: 32px;
+    vertical-align: middle;
+    padding-left: 4em;
+    background: url(/bitrix/r01images/attention.png) left center no-repeat;
+}
+div#reg_button input {
+    background-color: #0471c3;
+    background: #0471c3;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    text-shadow: none;
+    font-size: 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+</style>
+<script src="punycode.js"></script>
+
+</head>
+<body>
+<table style="width:90%; height:100%;" align="center" cellpadding="0" cellspacing="0">
+<tbody><tr>
+  <td valign="middle" align="center">
+    <a href="https://r01.ru/" class="logo_light" style="cursor: pointer; background: none;" on1click=" window.location.href ='https://r01.ru/'">
+      <div class="logo" ></div>
+    </a>
+  </td>
+
+  <td style="height:121px;" valign="middle" align="center">
+
+  </td>
+</tr>
+<tr>
+ 
+  <td class="content" valign="top">
+    <div align="center" style="padding:0em 1em 0 1em;">
+          </div>
+
+<div class="b-mainpage__banner b-banner">
+  <div class="b-banner__bdescript b-bdescript">
+    <p class="b-bdescript__smalltext">Срок регистрации для домена закончился.</p>
+    <p class="b-bdescript__bigtext" id=p_hostname></p>
+  </div>
+  <ul class="b-banner__promolist b-promolist clearfix">
+    <li class="g-left"><a id="cont_id" class="b-promolist__link" style="cursor: pointer;" href="https://partner.r01.ru">Продлить</a></li>
+  </ul>
+</div>
+
+      </tbody></table>
+    </div>
+  </td>
+</tr>
+</tbody></table>
+<script>
+var UTF8_HOSTNAME=toUnicode(document.URL.replace("http://", "").replace("/", ""));
+var elem = document.getElementById("p_hostname");
+elem.innerText = UTF8_HOSTNAME;
+
+const prefix_url = "https://partner.r01.ru/prolong_expired.khtml?domain=";
+
+var elem2 = document.getElementById("cont_id");
+elem2.href = prefix_url + encodeURIComponent(UTF8_HOSTNAME);
+
+</script>
+</body></html>

@@ -1,0 +1,369 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="robots" content="noyaca">
+    <title>
+        {% if is_single and posts %}
+            {{ posts[0].title }} - {{ posts[0].category }} комиксы
+        {% elif current_category %}
+            {{ category_display }} комиксы - Comicsbook.ru
+        {% elif search_query %}
+            Поиск: {{ search_query }} - Comicsbook.ru
+        {% else %}
+            Comicsbook.ru - Лучшие комиксы Рунета!
+        {% endif %}
+    </title>
+    <!-- Use original CSS -->
+    <link href="/css/style.css" rel="stylesheet" type="text/css">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    
+    <style>
+        /* Custom overrides to adjust for local server and modern viewports */
+        .wrapper {
+            margin: 0 auto;
+            max-width: 1000px;
+        }
+        .header {
+            padding: 20px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo a {
+            font-size: 32px;
+            font-weight: bold;
+            text-decoration: none;
+            color: #3b5998;
+        }
+        .menu {
+            margin-bottom: 20px;
+        }
+        .content {
+            display: flex;
+            justify-content: space-between;
+        }
+        .mainContent {
+            width: 620px;
+            float: left;
+        }
+        .aside {
+            width: 320px;
+            float: right;
+        }
+        .item {
+            background: #fff;
+            border: 1px solid #d3d6db;
+            border-radius: 3px;
+            margin-bottom: 20px;
+            padding: 15px;
+        }
+        .item header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .item header .ava {
+            margin-right: 15px;
+        }
+        .item header .text h2 {
+            display: inline;
+            font-size: 16px;
+            margin: 0;
+        }
+        .item header .text h3 {
+            font-size: 18px;
+            margin: 5px 0 0 0;
+            color: #2b587a;
+        }
+        .item section {
+            text-align: center;
+            margin: 15px 0;
+        }
+        .item section img {
+            max-width: 100%;
+            height: auto;
+        }
+        .item footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+            color: #777;
+        }
+        .item footer .rate {
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .item footer .rate p {
+            margin: 0 10px;
+            color: #3b5998;
+        }
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+        .pagination li {
+            margin: 0 5px;
+        }
+        .pagination li a, .pagination li span {
+            display: block;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            text-decoration: none;
+            color: #333;
+            border-radius: 3px;
+        }
+        .pagination li.active span {
+            background-color: #3b5998;
+            color: white;
+            border-color: #3b5998;
+        }
+        /* Navigation detail */
+        .detail-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .detail-navigation a {
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: #f0f2f5;
+            color: #2b587a;
+            text-decoration: none;
+            border-radius: 4px;
+            border: 1px solid #d3d6db;
+            font-weight: bold;
+        }
+        .detail-navigation a:hover {
+            background-color: #e4e6eb;
+        }
+    </style>
+    <script>
+        function toggleComments(postId) {
+            var el = document.getElementById('comments-' + postId);
+            if (el.style.display === 'none') {
+                el.style.display = 'block';
+            } else {
+                el.style.display = 'none';
+            }
+        }
+    </script>
+</head>
+<body>
+<div class="wrapper">	
+    <div class="container">
+        <div class="content-hold"> 			
+            <header class="header">
+                <div class="logo"><a href="/">Comicsbook</a></div>
+                <div class="auth">
+                    Локальный архив сайта comicsbook.ru
+                </div>			
+            </header> 
+            
+            <ul class="menu">
+                <li><a class="main" title="Главная" href="/">Главная</a></li>
+                <li><a href="/all">Бездна (Новое)</a></li>
+                <li><a href="/best">Лучшие</a></li>				
+                <li><a href="/random">Случайный</a></li>
+                <div class="rmenu">
+                    <li><a href="/random" class="empty">Случайный мем</a></li>
+                </div>
+            </ul>
+
+            <!-- Search bar -->
+            <div style="margin-bottom: 20px;">
+                <form action="/search" method="GET">
+                    <input type="text" name="s" value="{{ search_query or '' }}" placeholder="Поиск комиксов по названию..." style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                </form>
+            </div>
+            
+            <div class="content">
+                <section class="mainContent">
+                    
+                    {% if is_single %}
+                        <div class="detail-navigation">
+                            {% if prev_post %}
+                                <a href="/{{ prev_post.category.lower() }}/{{ prev_post.id }}">← Предыдущий</a>
+                            {% else %}
+                                <span></span>
+                            {% endif %}
+                            
+                            <a href="/">На главную</a>
+                            
+                            {% if next_post %}
+                                <a href="/{{ next_post.category.lower() }}/{{ next_post.id }}">Следующий →</a>
+                            {% else %}
+                                <span></span>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+
+                    {% if search_query %}
+                        <h2 style="margin-top:0; color: #2b587a;">Результаты поиска по запросу «{{ search_query }}»:</h2>
+                    {% elif current_category %}
+                        <h2 style="margin-top:0; color: #2b587a;">Категория: {{ category_display }}</h2>
+                    {% endif %}
+                    
+                    {% if not posts %}
+                        <div class="item">
+                            <p style="text-align: center; font-size: 16px; color: #777; padding: 20px 0;">Комиксы не найдены. Возможно, база данных ещё сканируется или ничего не соответствует вашему поиску.</p>
+                        </div>
+                    {% endif %}
+
+                    {% for post in posts %}
+                        {% set post_filename = post.image_url.split('/')[-1] %}
+                        <!-- We map categories to gif numbers for original avatars, or fallback to default -->
+                        {% set cat_gif = "28.gif" %}
+                        {% if post.category == "FFFUUUuuu" %}{% set cat_gif = "2.gif" %}
+                        {% elif post.category == "Trollface" %}{% set cat_gif = "1.gif" %}
+                        {% elif post.category == "Poker Face" %}{% set cat_gif = "5.gif" %}
+                        {% elif post.category == "LOL" %}{% set cat_gif = "4.gif" %}
+                        {% elif post.category == "Me Gusta" %}{% set cat_gif = "7.gif" %}
+                        {% elif post.category == "Okay" %}{% set cat_gif = "26.gif" %}
+                        {% elif post.category == "Genius" %}{% set cat_gif = "61.gif" %}
+                        {% elif post.category == "Forever Alone" %}{% set cat_gif = "25.gif" %}
+                        {% elif post.category == "Yao Ming" %}{% set cat_gif = "19.gif" %}
+                        {% endif %}
+
+                        <div class="item" id="post_{{ post.id }}"> 
+                            <header>
+                                <div class="ava">
+                                    <a href="/{{ post.category.lower() }}">
+                                        <img src="/img/cats/{{ cat_gif }}" width="61" height="61" alt="{{ post.category }}" title="{{ post.category }}">
+                                    </a>
+                                </div>
+                                <div class="text">
+                                    <div class="author">Добавил: {% if post.author %}{{ post.author }}{% else %}Аноним{% endif %}</div>
+                                    <a href="/{{ post.category.lower() }}"><h2 class="cat">{{ post.category }}</h2></a> 
+                                    <span>/</span> 
+                                    {% if post.date_str %}{{ post.date_str }}{% else %}Архив{% endif %}
+                                    <a href="/{{ post.category.lower() }}/{{ post.id }}"><h3>{{ post.title }}</h3></a>
+                                </div>						
+                            </header> 
+                            
+                            <section>
+                                <a href="/{{ post.category.lower() }}/{{ post.id }}">
+                                    {% if post.local_exists %}
+                                        <img title="Комикс {{ post.category }} {{ post.title }} {{ post.id }}" alt="Комикс {{ post.category }} {{ post.title }} {{ post.id }}" src="/upload/{{ post.filename }}">
+                                    {% else %}
+                                        <img title="Комикс {{ post.category }} {{ post.title }} {{ post.id }}" alt="Комикс {{ post.category }} {{ post.title }} {{ post.id }}" src="http://web.archive.org/web/{{ post.timestamp }}id_/http://comicsbook.ru{{ post.image_url }}">
+                                    {% endif %}
+                                </a>
+                            </section>
+                            
+                            <footer>
+                                <div class="left">
+                                    <a href="/{{ post.category.lower() }}/{{ post.id }}">Ссылка на пост</a>
+                                </div>
+                                <div class="rate">
+                                    <span>–</span>
+                                    <p>{{ post.rating }}</p>
+                                    <span>+</span>
+                                </div>
+                            </footer>
+                            
+                            {% if post.comments %}
+                                <div class="comments-toggle" onclick="toggleComments({{ post.id }})" style="color: #2b587a; font-weight: bold; cursor: pointer; padding: 10px 0; border-top: 1px dashed #eee; font-size:13px; display: flex; align-items: center; gap: 5px;">
+                                    <span>▼</span> Комментарии ({{ post.comments|length }})
+                                </div>
+                                <div class="comments-box" id="comments-{{ post.id }}" style="display: none; background: #fafafa; border-top: 1px dashed #eee; padding: 10px; border-radius: 0 0 3px 3px;">
+                                    {% for comment in post.comments %}
+                                        <div class="comment-item" style="display: flex; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #eee; font-size: 13px;">
+                                            <img class="comment-avatar" src="{{ comment.avatar_url }}" style="width: 32px; height: 32px; border-radius: 50%; margin-right: 10px; background: #eee;">
+                                            <div class="comment-body" style="flex: 1;">
+                                                <div class="comment-author" style="font-weight: bold; color: #2b587a; margin-bottom: 2px;">{{ comment.author_name }}</div>
+                                                <div class="comment-text" style="color: #333; line-height: 1.4;">{{ comment.comment_text }}</div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}					
+                        </div>
+                    {% endfor %}
+                    
+                    {% if not is_single and total_pages > 1 %}
+                        <ul class="pagination">
+                            {% if page > 1 %}
+                                <li><a href="?p=1{% if sort %}&sort={{ sort }}{% endif %}{% if search_query %}&s={{ search_query }}{% endif %}">« Первая</a></li>
+                                <li><a href="?p={{ page - 1 }}{% if sort %}&sort={{ sort }}{% endif %}{% if search_query %}&s={{ search_query }}{% endif %}">‹ Назад</a></li>
+                            {% endif %}
+                            
+                            {% set start_page = max(1, page - 4) %}
+                            {% set end_page = min(total_pages, page + 4) %}
+                            
+                            {% for p in range(start_page, end_page + 1) %}
+                                {% if p == page %}
+                                    <li class="active"><span>{{ p }}</span></li>
+                                {% else %}
+                                    <li><a href="?p={{ p }}{% if sort %}&sort={{ sort }}{% endif %}{% if search_query %}&s={{ search_query }}{% endif %}">{{ p }}</a></li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if page < total_pages %}
+                                <li><a href="?p={{ page + 1 }}{% if sort %}&sort={{ sort }}{% endif %}{% if search_query %}&s={{ search_query }}{% endif %}">Вперед ›</a></li>
+                                <li><a href="?p={{ total_pages }}{% if sort %}&sort={{ sort }}{% endif %}{% if search_query %}&s={{ search_query }}{% endif %}">Последняя »</a></li>
+                            {% endif %}
+                        </ul>
+                    {% endif %}
+                    
+                </section>
+                
+                <aside class="aside">
+                    <!-- Categories -->
+                    <div class="block categories" id="pics" style="background: #fff; border: 1px solid #d3d6db; border-radius: 3px; padding: 15px; margin-bottom: 20px;">
+                        <h4 style="margin-top:0; color: #2b587a; border-bottom: 1px solid #eee; padding-bottom: 5px; font-size:16px;">Категории</h4>
+                        <ul style="list-style: none; padding: 0; margin: 10px 0 0 0;">
+                            {% for cat in categories %}
+                                <li style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+                                    <a href="/{{ cat.category.lower() }}" style="text-decoration: none; color: #2b587a; font-weight: bold; font-size:14px;">
+                                        {{ cat.category }}
+                                    </a>
+                                    <span style="background: #f0f2f5; font-size: 11px; padding: 2px 6px; border-radius: 10px; color: #777;">
+                                        {{ cat.count }}
+                                    </span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    
+                    <!-- Discussed / Top rated -->
+                    <div class="block discuss" style="background: #fff; border: 1px solid #d3d6db; border-radius: 3px; padding: 15px; margin-bottom: 20px;">
+                        <h4 style="margin-top:0; color: #2b587a; border-bottom: 1px solid #eee; padding-bottom: 5px; font-size:16px;">Популярные комиксы</h4>
+                        <ul style="list-style: none; padding: 0; margin: 10px 0 0 0;">
+                            {% for post in discussed %}
+                                <li style="margin-bottom: 10px; border-bottom: 1px dashed #eee; padding-bottom: 8px;">
+                                    <a href="/{{ post.category.lower() }}/{{ post.id }}" style="text-decoration: none; color: #3b5998; font-weight: bold; font-size:13px; display: block; margin-bottom: 3px;">
+                                        {{ post.title }}
+                                    </a>
+                                    <span style="font-size: 11px; color: #999;">
+                                        Рейтинг: <strong>+{{ post.rating }}</strong> | {{ post.category }}
+                                    </span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </aside>
+            </div>
+            
+            <footer class="footer" style="margin-top: 40px; border-top: 1px solid #d3d6db; padding-top: 20px; padding-bottom: 40px; color: #777; font-size: 12px; display: flex; justify-content: space-between;">
+                <div>
+                    <strong>Навигация:</strong> <a href="/" style="color:#2b587a;">Главная</a> | <a href="/all" style="color:#2b587a;">Бездна</a> | <a href="/best" style="color:#2b587a;">Лучшие</a> | <a href="/random" style="color:#2b587a;">Случайный</a>
+                </div>
+                <div>
+                    © 2011-2013, Comicsbook.ru (Восстановлено локально)
+                </div>
+            </footer>
+        </div>		
+    </div>
+</div>
+</body>
+</html>

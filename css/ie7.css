@@ -1,0 +1,11 @@
+@charset "utf-8";
+
+.socials li {
+	display:inline;
+	margin-right:10px;
+}
+
+.right .socials li {
+	margin-right:0;
+	margin-left:10px;
+}
