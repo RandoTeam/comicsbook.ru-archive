@@ -74,6 +74,11 @@ def download_and_convert(row):
                 break
                 
     if not cdx_info:
+        # Try _big suffix
+        big_path = os.path.splitext(lookup_path)[0] + "_big" + os.path.splitext(lookup_path)[1]
+        cdx_info = img_map.get(big_path)
+        
+    if not cdx_info:
         # Not present in CDX, skipping to avoid 404
         return 'failed', post_id
         
@@ -145,15 +150,18 @@ def main():
         cdx_data = json.load(f)
         
     rows = cdx_data[1:]
-    print("Building CDX image map with CP1251 decoding...")
+    print("Building CDX image map with UTF-8 decoding...")
     for row in rows:
         orig = row[0]
         ts = row[1]
-        status = row[3]
-        if ('comicsbook.ru/upload/' in orig or 'comicsbook.ru/wp-content/uploads/' in orig or 'comicsbook.ru/upl/' in orig) and status == '200':
+        # Allow status 200, 301, 302 and -
+        if ('comicsbook.ru/upload/' in orig or 'comicsbook.ru/wp-content/uploads/' in orig or 'comicsbook.ru/upl/' in orig):
             parsed = urllib.parse.urlparse(orig)
             path_bytes = urllib.parse.unquote_to_bytes(parsed.path)
-            decoded_path = path_bytes.decode('windows-1251', errors='ignore')
+            try:
+                decoded_path = path_bytes.decode('utf-8')
+            except Exception:
+                decoded_path = path_bytes.decode('windows-1251', errors='ignore')
             img_map[decoded_path.lower()] = (ts, orig)
             
     print(f"Mapped {len(img_map)} unique images from CDX.")
@@ -162,7 +170,7 @@ def main():
     print("Reading success records from database...")
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    cursor.execute("SELECT id, timestamp, image_url FROM comics WHERE status = 'success' AND image_url IS NOT NULL")
+    cursor.execute("SELECT id, timestamp, image_url FROM comics WHERE status = 'success' AND image_url IS NOT NULL ORDER BY rating DESC")
     db_rows = cursor.fetchall()
     conn.close()
     
