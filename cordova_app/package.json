@@ -14,6 +14,7 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "cordova-android": "^15.0.0",
+    "cordova-base64-to-gallery": "^4.1.3",
     "cordova-plugin-statusbar": "^4.0.0"
   },
   "cordova": {
@@ -21,7 +22,8 @@
       "android"
     ],
     "plugins": {
-      "cordova-plugin-statusbar": {}
+      "cordova-plugin-statusbar": {},
+      "cordova-base64-to-gallery": {}
     }
   }
 }

@@ -121,6 +121,13 @@ const Icons = {
     <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
       <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
     </svg>
+  ),
+  Download: (props) => (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <polyline points="7 10 12 15 17 10" />
+      <line x1="12" y1="15" x2="12" y2="3" />
+    </svg>
   )
 };
 
@@ -643,23 +650,27 @@ export default function App() {
 
   const copyImageToClipboard = async (filename) => {
     try {
-      const response = await fetch(`upload/${filename}`);
-      const blob = await response.blob();
-      
-      let finalBlob = blob;
-      if (blob.type === 'image/webp') {
-        const img = new Image();
-        img.src = `upload/${filename}`;
-        await new Promise((resolve) => { img.onload = resolve; });
-        const canvas = document.createElement('canvas');
-        canvas.width = img.naturalWidth;
-        canvas.height = img.naturalHeight;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0);
-        finalBlob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
-      }
-      
-      const item = new ClipboardItem({ [finalBlob.type]: finalBlob });
+      // Synchronously instantiate ClipboardItem with Promise value to preserve user gesture token
+      const pngPromise = (async () => {
+        const response = await fetch(`upload/${filename}`);
+        const blob = await response.blob();
+        
+        if (blob.type === 'image/webp') {
+          const img = new Image();
+          img.src = `upload/${filename}`;
+          await new Promise((resolve) => { img.onload = resolve; });
+          const canvas = document.createElement('canvas');
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+          const pngBlob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+          return pngBlob;
+        }
+        return blob;
+      })();
+
+      const item = new ClipboardItem({ 'image/png': pngPromise });
       await navigator.clipboard.write([item]);
       showToast("Картинка скопирована!");
     } catch (err) {
@@ -674,6 +685,48 @@ export default function App() {
       } catch (e) {
         showToast("Ошибка буфера обмена.");
       }
+    }
+  };
+
+  const saveImageToGallery = async (filename) => {
+    try {
+      if (window.cordova && window.cordova.plugins && window.cordova.plugins.base64ToGallery) {
+        showToast("Сохранение...");
+        const response = await fetch(`upload/${filename}`);
+        const blob = await response.blob();
+        
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64Data = reader.result;
+          const base64Clean = base64Data.split(',')[1];
+          
+          window.cordova.plugins.base64ToGallery(
+            base64Clean,
+            {
+              prefix: 'comics_',
+              mediaScanner: true
+            },
+            (path) => {
+              showToast("Сохранено в галерею!");
+            },
+            (err) => {
+              showToast("Ошибка сохранения: " + err);
+            }
+          );
+        };
+        reader.readAsDataURL(blob);
+      } else {
+        // Browser fallback
+        const link = document.createElement('a');
+        link.href = `upload/${filename}`;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showToast("Скачивание файла...");
+      }
+    } catch (err) {
+      showToast("Ошибка при сохранении.");
     }
   };
 
@@ -1729,6 +1782,16 @@ export default function App() {
                 }}
               >
                 <Icons.Copy className="option-icon" /> Скопировать картинку
+              </button>
+              
+              <button 
+                className="context-option" 
+                onClick={() => {
+                  saveImageToGallery(contextMenuPost.filename);
+                  setContextMenuPost(null);
+                }}
+              >
+                <Icons.Download className="option-icon" /> Сохранить в галерею
               </button>
 
               <button 
