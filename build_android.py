@@ -633,7 +633,7 @@ def write_mobile_index():
 
             // Search filter
             if (searchKeyword) {
-                const queryWords = searchKeyword.toLowerCase().split(/\s+/).filter(Boolean);
+                const queryWords = searchKeyword.toLowerCase().split(/\\s+/).filter(Boolean);
                 filtered = filtered.filter(p => {
                     const postComments = db.comments[p.id] || [];
                     const commentsText = postComments.map(c => (c.text || '') + ' ' + (c.name || '')).join(' ').toLowerCase();

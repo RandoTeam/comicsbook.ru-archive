@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Toast from './components/Toast';
 
 // Mono SVG Icons
@@ -148,6 +148,67 @@ export default function App() {
   const [displayCount, setDisplayCount] = useState(10);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [showScrollTopBtn, setShowScrollTopBtn] = useState(false);
+
+  const [contextMenuPost, setContextMenuPost] = useState(null);
+  const [fullscreenPost, setFullscreenPost] = useState(null);
+  const [hiddenPosts, setHiddenPosts] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('hiddenPosts') || '[]');
+    } catch (e) {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem('hiddenPosts', JSON.stringify(hiddenPosts));
+  }, [hiddenPosts]);
+
+  // Helper to bind Long-Press listeners dynamically (safe to call in loops/lists)
+  const bindLongPress = (post, onClick) => {
+    let timer = null;
+    let isLongPress = false;
+    let startCoords = { x: 0, y: 0 };
+
+    const start = (e) => {
+      isLongPress = false;
+      const touch = e.touches ? e.touches[0] : e;
+      startCoords = { x: touch.clientX, y: touch.clientY };
+      
+      timer = setTimeout(() => {
+        isLongPress = true;
+        // Trigger context menu
+        setContextMenuPost(post);
+      }, 500);
+    };
+
+    const stop = (e) => {
+      if (timer) clearTimeout(timer);
+      if (!isLongPress && onClick) {
+        onClick(e);
+      }
+    };
+
+    const move = (e) => {
+      if (timer) {
+        const touch = e.touches ? e.touches[0] : e;
+        const dx = touch.clientX - startCoords.x;
+        const dy = touch.clientY - startCoords.y;
+        // Cancel long press if finger moved more than 10px (scrolling)
+        if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+          clearTimeout(timer);
+        }
+      }
+    };
+
+    return {
+      onTouchStart: start,
+      onTouchEnd: stop,
+      onTouchMove: move,
+      onMouseDown: start,
+      onMouseUp: stop,
+      onMouseLeave: () => timer && clearTimeout(timer)
+    };
+  };
 
   // Auto-hiding header state
   const [headerVisible, setHeaderVisible] = useState(true);
@@ -515,6 +576,52 @@ export default function App() {
     });
   };
 
+  const copyImageToClipboard = async (filename) => {
+    try {
+      const response = await fetch(`upload/${filename}`);
+      const blob = await response.blob();
+      
+      let finalBlob = blob;
+      if (blob.type === 'image/webp') {
+        const img = new Image();
+        img.src = `upload/${filename}`;
+        await new Promise((resolve) => { img.onload = resolve; });
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        finalBlob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+      }
+      
+      const item = new ClipboardItem({ [finalBlob.type]: finalBlob });
+      await navigator.clipboard.write([item]);
+      showToast("Картинка скопирована!");
+    } catch (err) {
+      try {
+        const post = posts.find(p => p.filename === filename);
+        if (post) {
+          copyPostLink(post);
+          showToast("Копирование картинок не поддерживается. Ссылка скопирована!");
+        } else {
+          showToast("Не удалось скопировать.");
+        }
+      } catch (e) {
+        showToast("Ошибка буфера обмена.");
+      }
+    }
+  };
+
+  const copyPostLink = (post) => {
+    try {
+      const link = post.archive_url || `http://comicsbook.ru/post/${post.id}`;
+      navigator.clipboard.writeText(link);
+      showToast("Ссылка скопирована!");
+    } catch (e) {
+      showToast("Не удалось скопировать ссылку.");
+    }
+  };
+
   // Add/remove favorite
   const toggleFavorite = (postId) => {
     setFavorites((prev) => {
@@ -592,7 +699,7 @@ export default function App() {
   const getFilteredPosts = () => {
     let result = [];
     if (activeTab === 'feed') {
-      result = [...posts];
+      result = posts.filter(p => !hiddenPosts.includes(p.id));
     } else if (activeTab === 'favorites') {
       if (activeFolderId === 'all') {
         result = posts.filter((p) => favorites.includes(p.id));
@@ -826,7 +933,8 @@ export default function App() {
                   src={`upload/${selectedPost.filename}`} 
                   onError={(e) => handleImageError(e, selectedPost)} 
                   alt="" 
-                  style={{ width: '100%' }} 
+                  style={{ width: '100%', cursor: 'pointer' }} 
+                  {...bindLongPress(selectedPost, () => setFullscreenPost(selectedPost))}
                 />
               </section>
 
@@ -1015,6 +1123,7 @@ export default function App() {
                             onError={(e) => handleImageError(e, post)} 
                             alt="" 
                             loading="lazy" 
+                            {...bindLongPress(post)}
                           />
                         </div>
                         <div className="info">
@@ -1050,17 +1159,13 @@ export default function App() {
                         </div>
                       </header>
 
-                      <section
-                        onClick={() => {
-                          setSelectedPost(post);
-                        }}
-                        style={{ cursor: 'pointer' }}
-                      >
+                      <section style={{ cursor: 'pointer' }}>
                         <img 
                           src={`upload/${post.filename}`} 
                           onError={(e) => handleImageError(e, post)} 
                           alt="" 
                           loading="lazy" 
+                          {...bindLongPress(post, () => setSelectedPost(post))}
                         />
                       </section>
 
@@ -1434,6 +1539,94 @@ export default function App() {
               )}
             </div>
           </div>
+        </div>
+      )}
+      {/* Context Menu Overlay */}
+      {contextMenuPost && (
+        <div className="context-overlay" onClick={() => setContextMenuPost(null)}>
+          <div className="context-menu-container" onClick={(e) => e.stopPropagation()}>
+            <div className="context-menu-preview">
+              <img src={`upload/${contextMenuPost.filename}`} alt="" />
+            </div>
+            <div className="context-menu-options">
+              <button 
+                className="context-option" 
+                onClick={() => {
+                  setFullscreenPost(contextMenuPost);
+                  setContextMenuPost(null);
+                }}
+              >
+                <span className="option-icon">🔍</span> Показать во весь экран
+              </button>
+              
+              <button 
+                className="context-option" 
+                onClick={() => {
+                  copyImageToClipboard(contextMenuPost.filename);
+                  setContextMenuPost(null);
+                }}
+              >
+                <span className="option-icon">📋</span> Скопировать картинку
+              </button>
+
+              <button 
+                className="context-option" 
+                onClick={() => {
+                  const isFav = favorites.includes(contextMenuPost.id);
+                  toggleFavorite(contextMenuPost.id);
+                  showToast(isFav ? "Удалено из избранного" : "Добавлено в избранное");
+                  setContextMenuPost(null);
+                }}
+              >
+                <span className="option-icon">⭐</span> 
+                {favorites.includes(contextMenuPost.id) ? "Убрать из избранного" : "В избранное"}
+              </button>
+
+              <button 
+                className="context-option" 
+                onClick={() => {
+                  setSaveToFolderPost(contextMenuPost);
+                  setContextMenuPost(null);
+                }}
+              >
+                <span className="option-icon">📁</span> Добавить в папку...
+              </button>
+
+              <button 
+                className="context-option" 
+                onClick={() => {
+                  copyPostLink(contextMenuPost);
+                  setContextMenuPost(null);
+                }}
+              >
+                <span className="option-icon">🔗</span> Поделиться ссылкой
+              </button>
+
+              <button 
+                className="context-option danger" 
+                onClick={() => {
+                  setHiddenPosts(prev => [...prev, contextMenuPost.id]);
+                  showToast("Пост скрыт из ленты");
+                  setContextMenuPost(null);
+                }}
+              >
+                <span className="option-icon">🚫</span> Скрыть этот мем
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Fullscreen Viewer Overlay */}
+      {fullscreenPost && (
+        <div className="fullscreen-overlay" onClick={() => setFullscreenPost(null)}>
+          <button className="fullscreen-close" onClick={() => setFullscreenPost(null)}>×</button>
+          <img 
+            className="fullscreen-img" 
+            src={`upload/${fullscreenPost.filename}`} 
+            alt="" 
+            onClick={(e) => e.stopPropagation()} 
+          />
         </div>
       )}
     </div>
