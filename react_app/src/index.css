@@ -616,3 +616,48 @@ body {
   font-size: 40px;
   margin-bottom: 12px;
 }
+
+/* Material Design Smooth Transitions & Effects */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.active-pulse {
+  animation: pulse 2s infinite ease-in-out;
+}
+
+.item {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.item:active {
+  transform: scale(0.98);
+}
+
+.header-btn {
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+.header-btn:active {
+  transform: scale(0.9);
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Glassmorphism search box */
+.search-box {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+
+[data-theme='dark'] .search-box, [data-theme='oled'] .search-box {
+  background: rgba(0, 0, 0, 0.3);
+}

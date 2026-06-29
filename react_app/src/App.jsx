@@ -1,7 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
+import Toast from './components/Toast';
 
 // Mono SVG Icons
 const Icons = {
+  Music: (props) => (
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" {...props}>
+      <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+    </svg>
+  ),
   Feed: (props) => (
     <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" {...props}>
       <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14H7v-2h5v2zm5-4H7v-2h10v2zm0-4H7V7h10v2z"/>
@@ -121,6 +127,10 @@ export default function App() {
   const [loading, setLoading] = useState(true);
 
   // App UI state
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+  const audioRef = useRef(null);
+  const [showExitToast, setShowExitToast] = useState(false);
+  const backPressTime = useRef(0);
   const [activeTab, setActiveTab] = useState(() => localStorage.getItem('activeTab') || 'feed');
   const [activeSort, setActiveSort] = useState(() => localStorage.getItem('activeSort') || 'best');
   const [activeCategory, setActiveCategory] = useState(() => {
@@ -148,7 +158,13 @@ export default function App() {
   });
   const [history, setHistory] = useState(() => {
     const saved = localStorage.getItem('history');
-    return saved ? JSON.parse(saved) : [];
+    if (!saved) return [];
+    try {
+      const parsed = JSON.parse(saved);
+      return parsed.map(item => typeof item === 'object' && item.id ? item : { id: item, ts: Date.now() });
+    } catch (e) {
+      return [];
+    }
   });
   const [likes, setLikes] = useState(() => {
     const saved = localStorage.getItem('likes');
@@ -207,6 +223,72 @@ export default function App() {
   const displayCounts = useRef(
     JSON.parse(localStorage.getItem('displayCounts')) || {}
   );
+
+
+  // Hardware back button listener for Cordova
+  useEffect(() => {
+    const onBackKeyDown = (e) => {
+      e.preventDefault();
+      
+      if (showFolderModal) {
+        setShowFolderModal(false);
+        return;
+      }
+      
+      if (showSearch) {
+        setShowSearch(false);
+        setSearchKeyword('');
+        return;
+      }
+      
+      if (selectedPost) {
+        setSelectedPost(null);
+        setTimeout(() => {
+          window.scrollTo(0, scrollPositions.current[activeTab] || 0);
+        }, 50);
+        return;
+      }
+      
+      if (activeCategory) {
+        setActiveCategory(null);
+        return;
+      }
+      
+      if (activeTab !== 'feed') {
+        handleTabChange('feed');
+        return;
+      }
+      
+      // We are on the top level of the feed tab
+      const currentTime = new Date().getTime();
+      if (currentTime - backPressTime.current < 2000) {
+        if (navigator.app && navigator.app.exitApp) {
+          navigator.app.exitApp();
+        }
+      } else {
+        setShowExitToast(true);
+        backPressTime.current = currentTime;
+      }
+    };
+
+    document.addEventListener("backbutton", onBackKeyDown, false);
+    return () => {
+      document.removeEventListener("backbutton", onBackKeyDown, false);
+    };
+  }, [showFolderModal, showSearch, selectedPost, activeCategory, activeTab]);
+
+  // Audio Play toggle
+  const toggleMusic = () => {
+    if (audioRef.current) {
+      if (isMusicPlaying) {
+        audioRef.current.pause();
+        setIsMusicPlaying(false);
+      } else {
+        audioRef.current.play();
+        setIsMusicPlaying(true);
+      }
+    }
+  };
 
   // Sync state with local storage
   useEffect(() => {
@@ -414,8 +496,8 @@ export default function App() {
   // Add post to history
   const addToHistory = (postId) => {
     setHistory((prev) => {
-      const filtered = prev.filter((id) => id !== postId);
-      return [postId, ...filtered].slice(0, 50); // limit to 50
+      const filtered = prev.filter((item) => item.id !== postId);
+      return [{ id: postId, ts: Date.now() }, ...filtered].slice(0, 50); // limit to 50
     });
   };
 
@@ -507,7 +589,11 @@ export default function App() {
       }
     } else if (activeTab === 'history') {
       result = history
-        .map((id) => posts.find((p) => p.id === id))
+        .map((item) => {
+          const post = posts.find((p) => p.id === item.id);
+          if (post) return { ...post, viewedAt: item.ts };
+          return null;
+        })
         .filter(Boolean);
     }
 
@@ -596,6 +682,9 @@ export default function App() {
 
   return (
     <div className={`app-container font-${fontSize}`}>
+      <audio ref={audioRef} loop src="audio/space.mp3" />
+      <Toast message="Нажмите еще раз для выхода" show={showExitToast} onHide={() => setShowExitToast(false)} />
+
       {/* Scroll Progress Bar */}
       {(activeTab === 'feed' || activeTab === 'favorites') && (
         <div className="progress-bar-container" style={{ top: headerVisible ? '48px' : '0' }}>
@@ -640,6 +729,13 @@ export default function App() {
           </div>
         )}
         <div className="header-actions">
+          <button
+            className={`header-btn ${isMusicPlaying ? 'active-pulse' : ''}`}
+            onClick={toggleMusic}
+            style={{ color: isMusicPlaying ? '#4facfe' : 'inherit' }}
+          >
+            <Icons.Music />
+          </button>
           {!selectedPost && (activeTab === 'feed' || activeTab === 'favorites') && (
             <button
               className="header-btn"
