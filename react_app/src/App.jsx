@@ -202,67 +202,73 @@ export default function App() {
 
   // Helper to bind Long-Press listeners dynamically (safe to call in loops/lists)
   const bindLongPress = (post, onClick) => {
-    let timer = null;
-    let isLongPress = false;
-    let hasMoved = false;
-    let startCoords = { x: 0, y: 0 };
-    let isTouch = false;
-
-    const start = (e) => {
-      // Prevent simulated mouse events after touch events
-      if (e.type === 'mousedown' && isTouch) {
-        return;
-      }
-      if (e.type === 'touchstart') {
-        isTouch = true;
-      }
-
-      isLongPress = false;
-      hasMoved = false;
-      const touch = e.touches ? e.touches[0] : e;
-      startCoords = { x: touch.clientX, y: touch.clientY };
-      
-      timer = setTimeout(() => {
-        isLongPress = true;
-        // Trigger context menu
-        setContextMenuPost(post);
-      }, 2000);
-    };
-
-    const stop = (e) => {
-      if (timer) clearTimeout(timer);
-      
-      if (e.type === 'mouseup' && isTouch) {
-        // Reset touch flag after a delay to allow future clicks
-        setTimeout(() => { isTouch = false; }, 300);
-        return;
-      }
-
-      if (!isLongPress && !hasMoved && onClick) {
-        onClick(e);
-      }
-    };
-
-    const move = (e) => {
-      if (timer || hasMoved === false) {
-        const touch = e.touches ? e.touches[0] : e;
-        const dx = touch.clientX - startCoords.x;
-        const dy = touch.clientY - startCoords.y;
-        // Cancel long press if finger moved more than 10px (scrolling)
-        if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
-          hasMoved = true;
-          if (timer) clearTimeout(timer);
-        }
-      }
-    };
-
     return {
-      onTouchStart: start,
-      onTouchEnd: stop,
-      onTouchMove: move,
-      onMouseDown: start,
-      onMouseUp: stop,
-      onMouseLeave: () => timer && clearTimeout(timer),
+      onTouchStart: (e) => {
+        window.longPressIsTouch = true;
+        window.longPressMoved = false;
+        window.longPressTriggered = false;
+        const touch = e.touches ? e.touches[0] : e;
+        window.longPressStartCoords = { x: touch.clientX, y: touch.clientY };
+        
+        if (window.longPressTimer) clearTimeout(window.longPressTimer);
+        window.longPressTimer = setTimeout(() => {
+          window.longPressTriggered = true;
+          setContextMenuPost(post);
+        }, 2500);
+      },
+      onTouchEnd: (e) => {
+        if (window.longPressTimer) {
+          clearTimeout(window.longPressTimer);
+          window.longPressTimer = null;
+        }
+        setTimeout(() => { window.longPressIsTouch = false; }, 300);
+
+        if (!window.longPressTriggered && !window.longPressMoved && onClick) {
+          onClick(e);
+        }
+      },
+      onTouchMove: (e) => {
+        if (!window.longPressMoved) {
+          const touch = e.touches ? e.touches[0] : e;
+          const dx = touch.clientX - (window.longPressStartCoords?.x || 0);
+          const dy = touch.clientY - (window.longPressStartCoords?.y || 0);
+          if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+            window.longPressMoved = true;
+            if (window.longPressTimer) {
+              clearTimeout(window.longPressTimer);
+              window.longPressTimer = null;
+            }
+          }
+        }
+      },
+      onMouseDown: (e) => {
+        if (window.longPressIsTouch) return;
+        window.longPressMoved = false;
+        window.longPressTriggered = false;
+        window.longPressStartCoords = { x: e.clientX, y: e.clientY };
+        
+        if (window.longPressTimer) clearTimeout(window.longPressTimer);
+        window.longPressTimer = setTimeout(() => {
+          window.longPressTriggered = true;
+          setContextMenuPost(post);
+        }, 2500);
+      },
+      onMouseUp: (e) => {
+        if (window.longPressIsTouch) return;
+        if (window.longPressTimer) {
+          clearTimeout(window.longPressTimer);
+          window.longPressTimer = null;
+        }
+        if (!window.longPressTriggered && !window.longPressMoved && onClick) {
+          onClick(e);
+        }
+      },
+      onMouseLeave: () => {
+        if (window.longPressTimer) {
+          clearTimeout(window.longPressTimer);
+          window.longPressTimer = null;
+        }
+      },
       onContextMenu: (e) => e.preventDefault()
     };
   };
@@ -1283,13 +1289,13 @@ export default function App() {
                         </div>
                       </header>
 
-                      <section style={{ cursor: 'pointer' }}>
+                      <section>
                         <img 
                           src={`upload/${post.filename}`} 
                           onError={(e) => handleImageError(e, post)} 
                           alt="" 
                           loading="lazy" 
-                          {...bindLongPress(post, () => setSelectedPost(post))}
+                          {...bindLongPress(post)}
                         />
                       </section>
 
