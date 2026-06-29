@@ -219,7 +219,7 @@ export default function App() {
         isLongPress = true;
         // Trigger context menu
         setContextMenuPost(post);
-      }, 500);
+      }, 2000);
     };
 
     const stop = (e) => {
@@ -801,10 +801,11 @@ export default function App() {
         const title = (p.title || '').toLowerCase();
         const category = (p.category || '').toLowerCase();
         const author = (p.author || '').toLowerCase();
+        const filename = (p.filename || '').toLowerCase();
         const idStr = String(p.id);
 
         return queryWords.every(word => {
-          if (title.includes(word) || category.includes(word) || author.includes(word) || commentsText.includes(word) || idStr === word) {
+          if (title.includes(word) || category.includes(word) || author.includes(word) || commentsText.includes(word) || idStr === word || filename.includes(word)) {
             return true;
           }
           
@@ -1704,8 +1705,8 @@ export default function App() {
       )}
       {/* Context Menu Overlay */}
       {contextMenuPost && (
-        <div className="context-overlay" onClick={() => setContextMenuPost(null)}>
-          <div className="context-menu-container" onClick={(e) => e.stopPropagation()}>
+        <div className="context-overlay" onTouchStart={() => setContextMenuPost(null)} onClick={() => setContextMenuPost(null)}>
+          <div className="context-menu-container" onTouchStart={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()}>
             <div className="context-menu-preview">
               <img src={`upload/${contextMenuPost.filename}`} alt="" />
             </div>
