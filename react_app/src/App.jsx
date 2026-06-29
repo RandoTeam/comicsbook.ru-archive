@@ -393,12 +393,11 @@ export default function App() {
     setCurrentTrackIndex((prev) => (prev + 1) % playlist.length);
   };
 
-  useEffect(() => {
-    if (isMusicPlaying && audioRef.current) {
-      audioRef.current.volume = 0.2;
-      audioRef.current.play().catch(e => console.log(e));
-    }
-  }, [currentTrackIndex]);
+  const handleTrackError = (e) => {
+    console.log('Audio error:', e);
+    // Move to next track on error to avoid getting stuck
+    handleTrackEnded();
+  };
 
   // App lifecycle listener
   useEffect(() => {
@@ -1050,7 +1049,7 @@ export default function App() {
       <Toast message="Нажмите еще раз для выхода" show={showExitToast} onHide={() => setShowExitToast(false)} />
       <Toast message={toastMessage} show={showToastObj} onHide={() => setShowToastObj(false)} />
 
-      <audio ref={audioRef} src={playlist[currentTrackIndex]} onEnded={handleTrackEnded} />
+      <audio ref={audioRef} src={playlist[currentTrackIndex]} onEnded={handleTrackEnded} onError={handleTrackError} autoPlay={isMusicPlaying} />
 
       {/* Scroll Progress Bar */}
       {(activeTab === 'feed' || activeTab === 'favorites') && (
