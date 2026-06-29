@@ -8,6 +8,11 @@ const Icons = {
       <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
     </svg>
   ),
+  Music: (props) => (
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" {...props}>
+      <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+    </svg>
+  ),
   Feed: (props) => (
     <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" {...props}>
       <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14H7v-2h5v2zm5-4H7v-2h10v2zm0-4H7V7h10v2z"/>
@@ -146,9 +151,14 @@ const getCatGif = (cat) => {
   return `img/cats/${gif}`;
 };
 
+const brokenImageIds = new Set();
 const handleImageError = (e, post) => {
   if (!post || !post.image_url) return;
-  if (e.target.dataset.fallback) return;
+  if (e.target.dataset.fallback) {
+    brokenImageIds.add(post.id);
+    window.dispatchEvent(new Event('brokenImagesUpdated'));
+    return;
+  }
   e.target.dataset.fallback = 'true';
   const isFullUrl = post.image_url.startsWith('http://') || post.image_url.startsWith('https://');
   const originalUrl = isFullUrl ? post.image_url : `http://comicsbook.ru${post.image_url}`;
@@ -161,13 +171,29 @@ export default function App() {
   const [posts, setPosts] = useState([]);
   const [comments, setComments] = useState({});
   const [loading, setLoading] = useState(true);
+  const [, setForceUpdate] = useState(0);
+
+  useEffect(() => {
+    const handler = () => setForceUpdate(n => n + 1);
+    window.addEventListener('brokenImagesUpdated', handler);
+    return () => window.removeEventListener('brokenImagesUpdated', handler);
+  }, []);
 
   // App UI state
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const audioRef = useRef(null);
-  const playlist = ['audio/space1.mp3', 'audio/space2.mp3', 'audio/space3.mp3'];
+  const playlist = ['audio/track1.m4a', 'audio/track2.m4a', 'audio/track3.m4a', 'audio/track4.m4a', 'audio/track5.m4a'];
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [showExitToast, setShowExitToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [showToastObj, setShowToastObj] = useState(false);
+
+  const showToast = (msg) => {
+    setToastMessage(msg);
+    setShowToastObj(true);
+    setTimeout(() => setShowToastObj(false), 3000);
+  };
+
   const backPressTime = useRef(0);
   const [activeTab, setActiveTab] = useState(() => localStorage.getItem('activeTab') || 'feed');
   const [activeSort, setActiveSort] = useState(() => localStorage.getItem('activeSort') || 'best');
@@ -199,79 +225,6 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('hiddenPosts', JSON.stringify(hiddenPosts));
   }, [hiddenPosts]);
-
-  // Helper to bind Long-Press listeners dynamically (safe to call in loops/lists)
-  const bindLongPress = (post, onClick) => {
-    return {
-      onTouchStart: (e) => {
-        window.longPressIsTouch = true;
-        window.longPressMoved = false;
-        window.longPressTriggered = false;
-        const touch = e.touches ? e.touches[0] : e;
-        window.longPressStartCoords = { x: touch.clientX, y: touch.clientY };
-        
-        if (window.longPressTimer) clearTimeout(window.longPressTimer);
-        window.longPressTimer = setTimeout(() => {
-          window.longPressTriggered = true;
-          setContextMenuPost(post);
-        }, 2500);
-      },
-      onTouchEnd: (e) => {
-        if (window.longPressTimer) {
-          clearTimeout(window.longPressTimer);
-          window.longPressTimer = null;
-        }
-        setTimeout(() => { window.longPressIsTouch = false; }, 300);
-
-        if (!window.longPressTriggered && !window.longPressMoved && onClick) {
-          onClick(e);
-        }
-      },
-      onTouchMove: (e) => {
-        if (!window.longPressMoved) {
-          const touch = e.touches ? e.touches[0] : e;
-          const dx = touch.clientX - (window.longPressStartCoords?.x || 0);
-          const dy = touch.clientY - (window.longPressStartCoords?.y || 0);
-          if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
-            window.longPressMoved = true;
-            if (window.longPressTimer) {
-              clearTimeout(window.longPressTimer);
-              window.longPressTimer = null;
-            }
-          }
-        }
-      },
-      onMouseDown: (e) => {
-        if (window.longPressIsTouch) return;
-        window.longPressMoved = false;
-        window.longPressTriggered = false;
-        window.longPressStartCoords = { x: e.clientX, y: e.clientY };
-        
-        if (window.longPressTimer) clearTimeout(window.longPressTimer);
-        window.longPressTimer = setTimeout(() => {
-          window.longPressTriggered = true;
-          setContextMenuPost(post);
-        }, 2500);
-      },
-      onMouseUp: (e) => {
-        if (window.longPressIsTouch) return;
-        if (window.longPressTimer) {
-          clearTimeout(window.longPressTimer);
-          window.longPressTimer = null;
-        }
-        if (!window.longPressTriggered && !window.longPressMoved && onClick) {
-          onClick(e);
-        }
-      },
-      onMouseLeave: () => {
-        if (window.longPressTimer) {
-          clearTimeout(window.longPressTimer);
-          window.longPressTimer = null;
-        }
-      },
-      onContextMenu: (e) => e.preventDefault()
-    };
-  };
 
   // Auto-hiding header state
   const [headerVisible, setHeaderVisible] = useState(true);
@@ -350,6 +303,25 @@ export default function App() {
     JSON.parse(localStorage.getItem('displayCounts')) || {}
   );
 
+  const dialogRef = useRef(null);
+
+  useEffect(() => {
+    if (contextMenuPost && dialogRef.current && !dialogRef.current.open) {
+      dialogRef.current.showModal();
+    } else if (!contextMenuPost && dialogRef.current && dialogRef.current.open) {
+      dialogRef.current.close();
+    }
+  }, [contextMenuPost]);
+
+  // Lock body scroll when overlay is active
+  useEffect(() => {
+    if (contextMenuPost || fullscreenPost || showFolderModal || saveToFolderPost) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+    return () => { document.body.style.overflow = 'auto'; };
+  }, [contextMenuPost, fullscreenPost, showFolderModal, saveToFolderPost]);
 
   // Hardware back button listener for Cordova
   useEffect(() => {
@@ -428,10 +400,92 @@ export default function App() {
     }
   }, [currentTrackIndex]);
 
+  // App lifecycle listener
+  useEffect(() => {
+    const onPause = () => {
+      if (audioRef.current && !audioRef.current.paused) {
+        audioRef.current.pause();
+        setIsMusicPlaying(false);
+      }
+    };
+    document.addEventListener("pause", onPause, false);
+    return () => {
+      document.removeEventListener("pause", onPause, false);
+    };
+  }, []);
+
+  // Hardware back button listener for Cordova
+  useEffect(() => {
+    const onBackKeyDown = (e) => {
+      e.preventDefault();
+      
+      if (showFolderModal) {
+        setShowFolderModal(false);
+        return;
+      }
+      
+      if (showSearch) {
+        setShowSearch(false);
+        setSearchKeyword('');
+        return;
+      }
+      
+      if (selectedPost) {
+        setSelectedPost(null);
+        setTimeout(() => {
+          window.scrollTo(0, scrollPositions.current[activeTab] || 0);
+        }, 50);
+        return;
+      }
+      
+      if (activeCategory) {
+        setActiveCategory(null);
+        return;
+      }
+      
+      if (activeTab !== 'feed') {
+        handleTabChange('feed');
+        return;
+      }
+      
+      // We are on the top level of the feed tab
+      const currentTime = new Date().getTime();
+      if (currentTime - backPressTime.current < 2000) {
+        if (navigator.app && navigator.app.exitApp) {
+          navigator.app.exitApp();
+        }
+      } else {
+        setShowExitToast(true);
+        backPressTime.current = currentTime;
+      }
+    };
+
+    document.addEventListener("backbutton", onBackKeyDown, false);
+    return () => {
+      document.removeEventListener("backbutton", onBackKeyDown, false);
+    };
+  }, [showFolderModal, showSearch, selectedPost, activeCategory, activeTab]);
+
+  // Audio Play toggle
+
   // Sync state with local storage
   useEffect(() => {
     localStorage.setItem('favorites', JSON.stringify(favorites));
   }, [favorites]);
+
+  // Global Context Menu Prevention for WebView freezes
+  useEffect(() => {
+    const preventContextMenu = (e) => {
+      // Allow context menu ONLY on inputs and textareas (e.g., for copy/paste)
+      if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+        e.preventDefault();
+      }
+    };
+    document.addEventListener('contextmenu', preventContextMenu, { capture: true, passive: false });
+    return () => {
+      document.removeEventListener('contextmenu', preventContextMenu, { capture: true });
+    };
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('history', JSON.stringify(history));
@@ -695,8 +749,8 @@ export default function App() {
   };
 
   const saveImageToGallery = async (filename) => {
-    try {
-      if (window.cordova && window.cordova.plugins && window.cordova.plugins.base64ToGallery) {
+    const doSave = async () => {
+      try {
         showToast("Сохранение...");
         const response = await fetch(`upload/${filename}`);
         const blob = await response.blob();
@@ -706,23 +760,68 @@ export default function App() {
           const base64Data = reader.result;
           const base64Clean = base64Data.split(',')[1];
           
-          window.cordova.plugins.base64ToGallery(
+          window.cordova.base64ToGallery(
             base64Clean,
-            {
-              prefix: 'comics_',
-              mediaScanner: true
-            },
-            (path) => {
-              showToast("Сохранено в галерею!");
-            },
-            (err) => {
-              showToast("Ошибка сохранения: " + err);
-            }
+            { prefix: 'comics_', mediaScanner: true },
+            (path) => showToast("Сохранено в галерею!"),
+            (err) => showToast("Ошибка сохранения: " + err)
           );
         };
         reader.readAsDataURL(blob);
-      } else {
-        // Browser fallback
+      } catch (err) {
+        showToast("Ошибка при скачивании файла.");
+      }
+    };
+
+    if (window.cordova && window.cordova.plugins) {
+      // Get Android version from User Agent
+      const ua = navigator.userAgent;
+      const match = ua.match(/Android\s+([0-9]+)/i);
+      const androidVersion = match ? parseInt(match[1], 10) : null;
+
+      if (androidVersion !== null && androidVersion >= 10) {
+        // API 29+ (Android 10+) does not require WRITE_EXTERNAL_STORAGE or READ_MEDIA_IMAGES for MediaStore insert
+        doSave();
+        return;
+      }
+
+      // Fallback for older Android versions
+      const permissionToRequest = "android.permission.WRITE_EXTERNAL_STORAGE";
+
+      try {
+        if (window.cordova.plugins.permissions) {
+          const permissions = window.cordova.plugins.permissions;
+          permissions.checkPermission(permissionToRequest, (status) => {
+            if (!status.hasPermission) {
+              permissions.requestPermission(permissionToRequest, (reqStatus) => {
+                if (reqStatus.hasPermission) {
+                  doSave();
+                } else {
+                  showToast("Разрешение отклонено. Невозможно сохранить.");
+                }
+              }, (err) => {
+                // Safe fallback: try saving anyway if permission request fails
+                doSave();
+              });
+            } else {
+              doSave();
+            }
+          }, (err) => {
+            // Safe fallback: try saving anyway if permission check fails
+            doSave();
+          });
+        } else if (window.cordova.base64ToGallery) {
+          doSave();
+        } else {
+          doSave();
+        }
+      } catch (e) {
+        // Safe fallback: try saving anyway if synchronous exception is thrown
+        doSave();
+      }
+    } else {
+      // Browser fallback
+      try {
         const link = document.createElement('a');
         link.href = `upload/${filename}`;
         link.download = filename;
@@ -730,9 +829,7 @@ export default function App() {
         link.click();
         document.body.removeChild(link);
         showToast("Скачивание файла...");
-      }
-    } catch (err) {
-      showToast("Ошибка при сохранении.");
+      } catch (e) {}
     }
   };
 
@@ -886,7 +983,7 @@ export default function App() {
 
     // Hide missing images filter
     if (hideMissingImages) {
-      result = result.filter((p) => p.filename && p.filename.endsWith('.webp') && p.image_exists);
+      result = result.filter((p) => p.filename && p.filename.endsWith('.webp') && p.image_exists && !brokenImageIds.has(p.id));
     }
 
     // Sort (only if we're not inside history tab)
@@ -946,10 +1043,14 @@ export default function App() {
     }
   };
 
+
+
   return (
     <div className={`app-container font-${fontSize}`}>
-      <audio ref={audioRef} src={playlist[currentTrackIndex]} onEnded={handleTrackEnded} />
       <Toast message="Нажмите еще раз для выхода" show={showExitToast} onHide={() => setShowExitToast(false)} />
+      <Toast message={toastMessage} show={showToastObj} onHide={() => setShowToastObj(false)} />
+
+      <audio ref={audioRef} src={playlist[currentTrackIndex]} onEnded={handleTrackEnded} />
 
       {/* Scroll Progress Bar */}
       {(activeTab === 'feed' || activeTab === 'favorites') && (
@@ -1004,14 +1105,6 @@ export default function App() {
           >
             <Icons.Music />
           </button>
-          {!selectedPost && activeTab !== 'search' && (
-            <button
-              className="header-btn"
-              onClick={() => handleTabChange('search')}
-            >
-              <Icons.Search />
-            </button>
-          )}
         </div>
       </header>
 
@@ -1046,7 +1139,8 @@ export default function App() {
                   onError={(e) => handleImageError(e, selectedPost)} 
                   alt="" 
                   style={{ width: '100%', cursor: 'pointer' }} 
-                  {...bindLongPress(selectedPost, () => setFullscreenPost(selectedPost))}
+                  onContextMenu={(e) => { e.preventDefault(); setContextMenuPost(selectedPost); }}
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); setFullscreenPost(selectedPost); }}
                 />
               </section>
 
@@ -1253,7 +1347,7 @@ export default function App() {
                             onError={(e) => handleImageError(e, post)} 
                             alt="" 
                             loading="lazy" 
-                            {...bindLongPress(post)}
+                            onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); setContextMenuPost(post); }}
                           />
                         </div>
                         <div className="info">
@@ -1295,7 +1389,7 @@ export default function App() {
                           onError={(e) => handleImageError(e, post)} 
                           alt="" 
                           loading="lazy" 
-                          {...bindLongPress(post)}
+                          onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); setContextMenuPost(post); }}
                         />
                       </section>
 
@@ -1466,7 +1560,8 @@ export default function App() {
                       src={`upload/${randomPost.filename}`} 
                       onError={(e) => handleImageError(e, randomPost)} 
                       alt="" 
-                      {...bindLongPress(randomPost, () => setFullscreenPost(randomPost))}
+                      onContextMenu={(e) => { e.preventDefault(); setContextMenuPost(randomPost); }}
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); setFullscreenPost(randomPost); }}
                     />
                   </section>
 
@@ -1764,34 +1859,42 @@ export default function App() {
       )}
       {/* Context Menu Overlay */}
       {contextMenuPost && (
-        <div className="context-overlay" onTouchStart={() => setContextMenuPost(null)} onClick={() => setContextMenuPost(null)}>
-          <div className="context-menu-container" onTouchStart={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()}>
+        <dialog 
+          ref={dialogRef}
+          className="context-menu-dialog"
+          onClick={(e) => {
+            if (e.target === dialogRef.current) {
+               setContextMenuPost(null);
+            }
+          }}
+        >
+          <div className="context-menu-container">
             <div className="context-menu-preview">
               <img src={`upload/${contextMenuPost.filename}`} alt="" />
             </div>
             <div className="context-menu-options">
               <button 
-                className="context-option" 
+                className="context-option"
                 onClick={() => {
                   setFullscreenPost(contextMenuPost);
                   setContextMenuPost(null);
                 }}
               >
-                <Icons.Fullscreen className="option-icon" /> Показать во весь экран
+                <Icons.Fullscreen className="option-icon" /> На весь экран
               </button>
               
               <button 
-                className="context-option" 
+                className="context-option"
                 onClick={() => {
                   copyImageToClipboard(contextMenuPost.filename);
                   setContextMenuPost(null);
                 }}
               >
-                <Icons.Copy className="option-icon" /> Скопировать картинку
+                <Icons.Copy className="option-icon" /> Скопировать
               </button>
               
               <button 
-                className="context-option" 
+                className="context-option"
                 onClick={() => {
                   saveImageToGallery(contextMenuPost.filename);
                   setContextMenuPost(null);
@@ -1801,7 +1904,7 @@ export default function App() {
               </button>
 
               <button 
-                className="context-option" 
+                className="context-option"
                 onClick={() => {
                   const isFav = favorites.includes(contextMenuPost.id);
                   toggleFavorite(contextMenuPost.id);
@@ -1814,11 +1917,11 @@ export default function App() {
                 ) : (
                   <Icons.StarOutline className="option-icon" />
                 )}
-                {favorites.includes(contextMenuPost.id) ? "Убрать из избранного" : "В избранное"}
+                {favorites.includes(contextMenuPost.id) ? "В избранном" : "В избранное"}
               </button>
 
               <button 
-                className="context-option" 
+                className="context-option"
                 onClick={() => {
                   setSaveToFolderPost(contextMenuPost);
                   setContextMenuPost(null);
@@ -1828,7 +1931,7 @@ export default function App() {
               </button>
 
               <button 
-                className="context-option" 
+                className="context-option"
                 onClick={() => {
                   copyPostLink(contextMenuPost);
                   setContextMenuPost(null);
@@ -1838,7 +1941,7 @@ export default function App() {
               </button>
 
               <button 
-                className="context-option danger" 
+                className="context-option danger"
                 onClick={() => {
                   setHiddenPosts(prev => [...prev, contextMenuPost.id]);
                   showToast("Пост скрыт из ленты");
@@ -1849,7 +1952,7 @@ export default function App() {
               </button>
             </div>
           </div>
-        </div>
+        </dialog>
       )}
 
       {/* Fullscreen Viewer Overlay */}

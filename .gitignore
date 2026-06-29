@@ -29,3 +29,7 @@ cordova_app/node_modules/
 # Ignore generated database json
 cordova_app/www/data.json
 react_app/public/data.json
+screen*.png
+logcat_dump.txt
+scratch_cdx_images.json
+rewrite.py
