@@ -97,6 +97,30 @@ const Icons = {
     <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" {...props}>
       <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
     </svg>
+  ),
+  Copy: (props) => (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+    </svg>
+  ),
+  Share: (props) => (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+      <polyline points="16 6 12 2 8 6" />
+      <line x1="12" y1="2" x2="12" y2="15" />
+    </svg>
+  ),
+  Hide: (props) => (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <circle cx="12" cy="12" r="10" />
+      <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+    </svg>
+  ),
+  Fullscreen: (props) => (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+    </svg>
   )
 };
 
@@ -174,8 +198,17 @@ export default function App() {
     let timer = null;
     let isLongPress = false;
     let startCoords = { x: 0, y: 0 };
+    let isTouch = false;
 
     const start = (e) => {
+      // Prevent simulated mouse events after touch events
+      if (e.type === 'mousedown' && isTouch) {
+        return;
+      }
+      if (e.type === 'touchstart') {
+        isTouch = true;
+      }
+
       isLongPress = false;
       const touch = e.touches ? e.touches[0] : e;
       startCoords = { x: touch.clientX, y: touch.clientY };
@@ -189,6 +222,13 @@ export default function App() {
 
     const stop = (e) => {
       if (timer) clearTimeout(timer);
+      
+      if (e.type === 'mouseup' && isTouch) {
+        // Reset touch flag after a delay to allow future clicks
+        setTimeout(() => { isTouch = false; }, 300);
+        return;
+      }
+
       if (!isLongPress && onClick) {
         onClick(e);
       }
@@ -212,7 +252,8 @@ export default function App() {
       onTouchMove: move,
       onMouseDown: start,
       onMouseUp: stop,
-      onMouseLeave: () => timer && clearTimeout(timer)
+      onMouseLeave: () => timer && clearTimeout(timer),
+      onContextMenu: (e) => e.preventDefault()
     };
   };
 
@@ -1673,7 +1714,7 @@ export default function App() {
                   setContextMenuPost(null);
                 }}
               >
-                <span className="option-icon">🔍</span> Показать во весь экран
+                <Icons.Fullscreen className="option-icon" /> Показать во весь экран
               </button>
               
               <button 
@@ -1683,7 +1724,7 @@ export default function App() {
                   setContextMenuPost(null);
                 }}
               >
-                <span className="option-icon">📋</span> Скопировать картинку
+                <Icons.Copy className="option-icon" /> Скопировать картинку
               </button>
 
               <button 
@@ -1695,7 +1736,11 @@ export default function App() {
                   setContextMenuPost(null);
                 }}
               >
-                <span className="option-icon">⭐</span> 
+                {favorites.includes(contextMenuPost.id) ? (
+                  <Icons.StarFilled className="option-icon" style={{ color: '#f7a823' }} />
+                ) : (
+                  <Icons.StarOutline className="option-icon" />
+                )}
                 {favorites.includes(contextMenuPost.id) ? "Убрать из избранного" : "В избранное"}
               </button>
 
@@ -1706,7 +1751,7 @@ export default function App() {
                   setContextMenuPost(null);
                 }}
               >
-                <span className="option-icon">📁</span> Добавить в папку...
+                <Icons.FolderAdd className="option-icon" /> Добавить в папку...
               </button>
 
               <button 
@@ -1716,7 +1761,7 @@ export default function App() {
                   setContextMenuPost(null);
                 }}
               >
-                <span className="option-icon">🔗</span> Поделиться ссылкой
+                <Icons.Share className="option-icon" /> Поделиться ссылкой
               </button>
 
               <button 
@@ -1727,7 +1772,7 @@ export default function App() {
                   setContextMenuPost(null);
                 }}
               >
-                <span className="option-icon">🚫</span> Скрыть этот мем
+                <Icons.Hide className="option-icon" /> Скрыть этот мем
               </button>
             </div>
           </div>
