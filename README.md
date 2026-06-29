@@ -1,5 +1,7 @@
 # Comicsbook.ru Archive & Museum 🏛️
 
+[![Sponsor](https://img.shields.io/badge/Sponsor-☕%20Buy%20Me%20a%20Coffee-ff69b4?style=for-the-badge&logo=ko-fi&logoColor=white)](DONATION.md)
+
 ![Comicsbook.ru Archive](https://img.shields.io/badge/Status-Archival_Project-blue)
 ![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20Web-success)
 ![React](https://img.shields.io/badge/Frontend-React%2018-cyan)
@@ -30,14 +32,14 @@
 > Разработчики этого репозитория не претендуют на авторство оригинального пользовательского контента (UGC). Если вы являетесь законным правообладателем какого-либо графического материала или персонажа, представленного в архиве, и желаете, чтобы он был удален, пожалуйста, создайте **Issue** в данном репозитории, и контент будет незамедлительно удален.
 
 ## ☕ Поддержать автора (Support the Project)
-Архивация десятков тысяч мемов, парсинг полумертвого архива и разработка мобильного приложения — это долгий и кропотливый труд. Проект является абсолютно бесплатным и открытым, но если он вызвал у вас теплую ностальгию, и вы хотите поддержать дальнейшую разработку (или просто угостить автора кофе), вы можете сделать добровольный донат:
+Архивация десятков тысяч мемов, парсинг полумертвого архива и разработка мобильного приложения — это долгий и кропотливый труд. Проект является абсолютно бесплатным и открытым, но если он вызвал у вас теплую ностальгию, и вы хотите поддержать дальнейшую разработку (или просто угостить автора кофе), вы можете сделать добровольный донат. **[Подробнее о том, почему это важно, читайте здесь](DONATION.md)**.
 
-| Криптовалюта | Сеть | Адрес кошелька |
-|---|---|---|
-| **Bitcoin** | Bitcoin | `bc1qd5s9dwvyvlv320ynluk66zpd0p24knzxrjzwvr` |
-| **Ethereum** | Ethereum | `0xfca2fc261d4f23768a04ec49c3448278cdf17c2b` |
-| **USDT** | Ethereum (ERC-20) | `0xfca2fc261d4f23768a04ec49c3448278cdf17c2b` |
-| **USDC** | Ethereum (ERC-20) | `0xfca2fc261d4f23768a04ec49c3448278cdf17c2b` |
+| Криптовалюта | Сеть | Адрес кошелька | QR-код |
+|:---:|:---:|---|:---:|
+| **Bitcoin** | Bitcoin | `bc1qd5s9dwvyvlv320ynluk66zpd0p24knzxrjzwvr` | <img src="assets/support/btc_address_qr.png" width="100"/> |
+| **Ethereum** | Ethereum | `0xfca2fc261d4f23768a04ec49c3448278cdf17c2b` | <img src="assets/support/eth_address_qr.png" width="100"/> |
+| **USDT** | Ethereum (ERC-20) | `0xfca2fc261d4f23768a04ec49c3448278cdf17c2b` | <img src="assets/support/usdt_erc20_address_qr.png" width="100"/> |
+| **USDC** | Ethereum (ERC-20) | `0xfca2fc261d4f23768a04ec49c3448278cdf17c2b` | <img src="assets/support/usdc_erc20_address_qr.png" width="100"/> |
 
 *Все донаты добровольны и идут на оплату серверов, времени разработки и покупку кофе.* ❤️
 
