@@ -198,7 +198,11 @@ export default function App() {
   const [activeTab, setActiveTab] = useState(() => localStorage.getItem('activeTab') || 'feed');
   const [activeSort, setActiveSort] = useState(() => localStorage.getItem('activeSort') || 'best');
   const [activeCategory, setActiveCategory] = useState(() => {
-    const saved = localStorage.getItem('activeCategory');
+    let saved = localStorage.getItem('activeCategory');
+    if (saved === 'VK Archive') {
+      localStorage.setItem('activeCategory', 'ВКонтакте');
+      saved = 'ВКонтакте';
+    }
     return saved && saved !== 'null' ? saved : null;
   });
   const [searchKeyword, setSearchKeyword] = useState('');
