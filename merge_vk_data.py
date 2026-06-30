@@ -28,6 +28,7 @@ likes_updated = 0
 for vp in vk_posts:
     text = vp.get('text', '')
     link = vp.get('link', '')
+    cb_links = vp.get('cbLinks', [])
     likes_str = vp.get('likes', '0').replace(' ', '').replace('K', '000').replace(',', '.')
     
     # Try to parse likes
@@ -39,19 +40,21 @@ for vp in vk_posts:
     except:
         likes = 0
         
-    # Find IDs in text or link
-    matches = re.findall(r'comicsbook\.ru/(?:funny|comic)/(\d+)', text + ' ' + link)
+    # Search in text, link, and cbLinks
+    search_space = ' '.join([text, link] + cb_links)
+    
+    # Generic regex to match any comicsbook.ru URL and capture the ID
+    matches = re.findall(r'comicsbook\.ru/[^/]+/(\d+)', search_space, re.IGNORECASE)
     if matches:
-        # Match found! Use the first ID
         post_id = str(matches[0])
         if post_id in posts_by_id:
             # Update rating
             p = posts_by_id[post_id]
-            if not p.get('rating') or p.get('rating') == 0 or p.get('rating') < likes:
-                p['rating'] = likes
-                likes_updated += 1
+            # If the post exists, we update the rating (likes)
+            p['rating'] = likes
+            likes_updated += 1
         else:
-            # Create new post
+            # Create new post with the original ID from the site
             new_post = {
                 'id': int(post_id),
                 'title': text[:100] + '...' if len(text) > 100 else text,
@@ -69,7 +72,6 @@ for vp in vk_posts:
     else:
         # No comicsbook ID found. Generate a VK ID.
         vk_id = vp.get('id', '')
-        # Only add if it has an image
         if vk_id and vp.get('imgUrl'):
             post_id = 'vk_' + str(vk_id).replace('-', '_')
             if post_id not in posts_by_id:
