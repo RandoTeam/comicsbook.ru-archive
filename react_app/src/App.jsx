@@ -378,7 +378,7 @@ export default function App() {
   // Audio Play toggle
   const toggleMusic = () => {
     if (audioRef.current) {
-      audioRef.current.volume = 0.2; // Низкая громкость
+      audioRef.current.volume = 0.8; // Громкость 80%
       if (isMusicPlaying) {
         audioRef.current.pause();
         setIsMusicPlaying(false);
@@ -982,7 +982,13 @@ export default function App() {
 
     // Hide missing images filter
     if (hideMissingImages) {
-      result = result.filter((p) => p.filename && p.filename.endsWith('.webp') && p.image_exists && !brokenImageIds.has(p.id));
+      result = result.filter((p) => {
+        if (brokenImageIds.has(p.id)) return false;
+        if (p.category === 'ВКонтакте') {
+          return p.image_url && p.image_url.trim() !== '';
+        }
+        return p.filename && p.filename.endsWith('.webp') && p.image_exists;
+      });
     }
 
     // Sort (only if we're not inside history tab)

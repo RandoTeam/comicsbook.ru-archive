@@ -69,7 +69,7 @@ for vp in vk_posts:
             new_post = {
                 'id': int(post_id),
                 'title': text[:100] + '...' if len(text) > 100 else text,
-                'category': 'VK Archive',
+                'category': 'ВКонтакте',
                 'author': 'Unknown',
                 'date_str': vp.get('dateStr', ''),
                 'image_url': vp.get('imgUrl', ''),

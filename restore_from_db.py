@@ -39,8 +39,8 @@ for p in posts:
             p['title'] = title
             titles_updated += 1
             
-        # Update category if it is VK Archive
-        if category and p.get('category') == 'VK Archive':
+        # Update category if it is ВКонтакте
+        if category and p.get('category') == 'ВКонтакте':
             p['category'] = category
             categories_updated += 1
             
