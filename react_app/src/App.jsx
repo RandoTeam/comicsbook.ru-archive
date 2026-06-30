@@ -182,7 +182,7 @@ export default function App() {
   // App UI state
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const audioRef = useRef(null);
-  const playlist = ['audio/track1.m4a', 'audio/track2.m4a', 'audio/track3.m4a', 'audio/track4.m4a', 'audio/track5.m4a'];
+  const playlist = ['/audio/track1.m4a', '/audio/track2.m4a', '/audio/track3.m4a', '/audio/track4.m4a', '/audio/track5.m4a'];
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [showExitToast, setShowExitToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
