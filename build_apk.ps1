@@ -8,4 +8,5 @@ cd cordova_app\platforms\android
 .\gradlew assembleRelease
 cd C:\G_3.1\comicsbook
 Copy-Item -Path "cordova_app\platforms\android\app\build\outputs\apk\release\app-release-unsigned.apk" -Destination "comicsbook-release.apk" -Force
+apksigner sign --ks comicsbook.keystore --ks-pass pass:123456 --key-pass pass:123456 comicsbook-release.apk
 echo "Build complete."
