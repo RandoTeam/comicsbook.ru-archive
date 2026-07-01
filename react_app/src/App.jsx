@@ -151,6 +151,14 @@ const getCatGif = (cat) => {
   return `img/cats/${gif}`;
 };
 
+const getPostImageUrl = (post) => {
+  if (!post) return '';
+  if (post.category === 'ВКонтакте' && post.image_url) {
+    return post.image_url;
+  }
+  return `upload/${post.filename}`;
+};
+
 const brokenImageIds = new Set();
 const handleImageError = (e, post) => {
   if (!post || !post.image_url) return;
@@ -711,16 +719,17 @@ export default function App() {
     });
   };
 
-  const copyImageToClipboard = async (filename) => {
+  const copyImageToClipboard = async (post) => {
+    if (!post) return;
     try {
       // Synchronously instantiate ClipboardItem with Promise value to preserve user gesture token
       const pngPromise = (async () => {
-        const response = await fetch(`upload/${filename}`);
+        const response = await fetch(getPostImageUrl(post));
         const blob = await response.blob();
         
         if (blob.type === 'image/webp') {
           const img = new Image();
-          img.src = `upload/${filename}`;
+          img.src = getPostImageUrl(post);
           await new Promise((resolve) => { img.onload = resolve; });
           const canvas = document.createElement('canvas');
           canvas.width = img.naturalWidth;
@@ -738,24 +747,20 @@ export default function App() {
       showToast("Картинка скопирована!");
     } catch (err) {
       try {
-        const post = posts.find(p => p.filename === filename);
-        if (post) {
-          copyPostLink(post);
-          showToast("Копирование картинок не поддерживается. Ссылка скопирована!");
-        } else {
-          showToast("Не удалось скопировать.");
-        }
+        copyPostLink(post);
+        showToast("Копирование картинок не поддерживается. Ссылка скопирована!");
       } catch (e) {
         showToast("Ошибка буфера обмена.");
       }
     }
   };
 
-  const saveImageToGallery = async (filename) => {
+  const saveImageToGallery = async (post) => {
+    if (!post) return;
     const doSave = async () => {
       try {
         showToast("Сохранение...");
-        const response = await fetch(`upload/${filename}`);
+        const response = await fetch(getPostImageUrl(post));
         const blob = await response.blob();
         
         const reader = new FileReader();
@@ -826,8 +831,8 @@ export default function App() {
       // Browser fallback
       try {
         const link = document.createElement('a');
-        link.href = `upload/${filename}`;
-        link.download = filename;
+        link.href = getPostImageUrl(post);
+        link.download = post.filename || 'comic.jpg';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -988,10 +993,9 @@ export default function App() {
     if (hideMissingImages) {
       result = result.filter((p) => {
         if (brokenImageIds.has(p.id)) return false;
-        if (p.category === 'ВКонтакте') {
-          return p.image_url && p.image_url.trim() !== '';
-        }
-        return p.filename && p.filename.endsWith('.webp') && p.image_exists;
+        if (p.image_url && typeof p.image_url === 'string' && p.image_url.trim() !== '') return true;
+        if (p.filename && typeof p.filename === 'string' && p.filename.endsWith('.webp') && p.image_exists) return true;
+        return false;
       });
     }
 
@@ -1144,7 +1148,7 @@ export default function App() {
 
               <section style={{ margin: '12px 0' }}>
                 <img 
-                  src={`upload/${selectedPost.filename}`} 
+                  src={getPostImageUrl(selectedPost)} 
                   onError={(e) => handleImageError(e, selectedPost)} 
                   alt="" 
                   style={{ width: '100%', cursor: 'pointer' }} 
@@ -1352,7 +1356,7 @@ export default function App() {
                       >
                         <div className="thumb">
                           <img 
-                            src={`upload/${post.filename}`} 
+                            src={getPostImageUrl(post)} 
                             onError={(e) => handleImageError(e, post)} 
                             alt="" 
                             loading="lazy" 
@@ -1394,7 +1398,7 @@ export default function App() {
 
                       <section>
                         <img 
-                          src={`upload/${post.filename}`} 
+                          src={post.category === 'ВКонтакте' && post.image_url ? post.image_url : `upload/${post.filename}`} 
                           onError={(e) => handleImageError(e, post)} 
                           alt="" 
                           loading="lazy" 
@@ -1566,7 +1570,7 @@ export default function App() {
 
                   <section style={{ cursor: 'pointer' }}>
                     <img 
-                      src={`upload/${randomPost.filename}`} 
+                      src={randomPost.category === 'ВКонтакте' && randomPost.image_url ? randomPost.image_url : `upload/${randomPost.filename}`} 
                       onError={(e) => handleImageError(e, randomPost)} 
                       alt="" 
                       onContextMenu={(e) => { e.preventDefault(); setContextMenuPost(randomPost); }}
@@ -1879,7 +1883,7 @@ export default function App() {
         >
           <div className="context-menu-container">
             <div className="context-menu-preview">
-              <img src={`upload/${contextMenuPost.filename}`} alt="" />
+              <img src={contextMenuPost.category === 'ВКонтакте' && contextMenuPost.image_url ? contextMenuPost.image_url : `upload/${contextMenuPost.filename}`} alt="" />
             </div>
             <div className="context-menu-options">
               <button 
@@ -1895,7 +1899,7 @@ export default function App() {
               <button 
                 className="context-option"
                 onClick={() => {
-                  copyImageToClipboard(contextMenuPost.filename);
+                  copyImageToClipboard(contextMenuPost);
                   setContextMenuPost(null);
                 }}
               >
@@ -1905,7 +1909,7 @@ export default function App() {
               <button 
                 className="context-option"
                 onClick={() => {
-                  saveImageToGallery(contextMenuPost.filename);
+                  saveImageToGallery(contextMenuPost);
                   setContextMenuPost(null);
                 }}
               >
@@ -1970,7 +1974,7 @@ export default function App() {
           <button className="fullscreen-close" onClick={() => setFullscreenPost(null)}>×</button>
           <img 
             className="fullscreen-img" 
-            src={`upload/${fullscreenPost.filename}`} 
+            src={getPostImageUrl(fullscreenPost)} 
             alt="" 
             onClick={(e) => e.stopPropagation()} 
           />
