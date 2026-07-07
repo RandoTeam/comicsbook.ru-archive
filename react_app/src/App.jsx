@@ -211,6 +211,10 @@ export default function App() {
       localStorage.setItem('activeCategory', 'ВКонтакте');
       saved = 'ВКонтакте';
     }
+    if (saved && saved.length > 50) {
+      localStorage.removeItem('activeCategory');
+      return null;
+    }
     return saved && saved !== 'null' ? saved : null;
   });
   const [searchKeyword, setSearchKeyword] = useState('');
@@ -620,6 +624,17 @@ export default function App() {
       });
   }, []);
 
+  // Cleanup corrupted or invalid category from local storage
+  useEffect(() => {
+    if (posts.length > 0 && activeCategory) {
+      const validCategories = new Set(posts.map(p => p.category).filter(Boolean));
+      if (!validCategories.has(activeCategory)) {
+        setActiveCategory(null);
+        localStorage.removeItem('activeCategory');
+      }
+    }
+  }, [posts, activeCategory]);
+
   // Smart hiding header & Infinite scroll / Progress bar
   useEffect(() => {
     const handleScroll = () => {
@@ -948,10 +963,16 @@ export default function App() {
     }
 
     // Category filter (only applicable to feed)
-    if (activeTab === 'feed' && activeCategory) {
-      result = result.filter(
-        (p) => p.category.toLowerCase() === activeCategory.toLowerCase()
-      );
+    if (activeTab === 'feed') {
+      if (activeCategory) {
+        result = result.filter(
+          (p) => p.category.toLowerCase() === activeCategory.toLowerCase()
+        );
+      } else {
+        result = result.filter(
+          (p) => p.category !== 'ВКонтакте'
+        );
+      }
     }
 
     // Search filter

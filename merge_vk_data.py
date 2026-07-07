@@ -58,7 +58,7 @@ for vp in vk_posts:
             new_post = {
                 'id': int(post_id),
                 'title': text[:100] + '...' if len(text) > 100 else text,
-                'category': 'VK Archive',
+                'category': 'ВКонтакте',
                 'author': 'Unknown',
                 'date_str': vp.get('dateStr', ''),
                 'image_url': vp.get('imgUrl', ''),
@@ -73,12 +73,20 @@ for vp in vk_posts:
         # No comicsbook ID found. Generate a VK ID.
         vk_id = vp.get('id', '')
         if vk_id and vp.get('imgUrl'):
-            post_id = 'vk_' + str(vk_id).replace('-', '_')
+            # Convert string ID to a safe integer (e.g. by using hash or offset).
+            # VK IDs are usually numeric. We'll add 10000000 to avoid collision with standard posts.
+            try:
+                base_vk_id = int(str(vk_id).replace('-', ''))
+            except ValueError:
+                base_vk_id = hash(str(vk_id)) % 10000000
+                
+            post_id = 10000000 + base_vk_id
+            
             if post_id not in posts_by_id:
                 new_post = {
                     'id': post_id,
                     'title': text[:100] + '...' if len(text) > 100 else text,
-                    'category': 'VK Archive',
+                    'category': 'ВКонтакте',
                     'author': 'VK',
                     'date_str': vp.get('dateStr', ''),
                     'image_url': vp.get('imgUrl', ''),
