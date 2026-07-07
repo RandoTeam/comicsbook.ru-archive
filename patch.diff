@@ -1,0 +1,17 @@
+﻿diff --git a/react_app/src/App.jsx b/react_app/src/App.jsx
+index 2d20ef9..81e89ad 100644
+--- a/react_app/src/App.jsx
++++ b/react_app/src/App.jsx
+@@ -198,7 +198,11 @@ export default function App() {
+   const [activeTab, setActiveTab] = useState(() => localStorage.getItem('activeTab') || 'feed');
+   const [activeSort, setActiveSort] = useState(() => localStorage.getItem('activeSort') || 'best');
+   const [activeCategory, setActiveCategory] = useState(() => {
+-    const saved = localStorage.getItem('activeCategory');
++    let saved = localStorage.getItem('activeCategory');
++    if (saved === 'VK Archive') {
++      localStorage.setItem('activeCategory', '╨Т╨Ъ╨╛╨╜╤В╨░╨║╤В╨╡');
++      saved = '╨Т╨Ъ╨╛╨╜╤В╨░╨║╤В╨╡';
++    }
+     return saved && saved !== 'null' ? saved : null;
+   });
+   const [searchKeyword, setSearchKeyword] = useState('');
