@@ -8,6 +8,7 @@ import BottomNav from './components/BottomNav';
 import FullscreenViewer from './components/FullscreenViewer';
 import FolderModal from './components/FolderModal';
 import ContextMenuModal from './components/ContextMenuModal';
+import useAudioPlayer from './utils/useAudioPlayer';
 
 export default function App() {
   // DB state
@@ -23,11 +24,16 @@ export default function App() {
     return () => window.removeEventListener('brokenImagesUpdated', handler);
   }, []);
 
-  // App UI state
-  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
-  const audioRef = useRef(null);
-  const playlist = ['/audio/track1.m4a', '/audio/track2.m4a', '/audio/track3.m4a', '/audio/track4.m4a', '/audio/track5.m4a'];
-  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
+  // Audio Player custom hook
+  const {
+    isMusicPlaying,
+    currentTrackIndex,
+    audioRef,
+    toggleMusic,
+    handleTrackEnded,
+    handleTrackError,
+    playlist,
+  } = useAudioPlayer();
   const [showExitToast, setShowExitToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [showToastObj, setShowToastObj] = useState(false);
@@ -226,44 +232,6 @@ export default function App() {
       document.removeEventListener("backbutton", onBackKeyDown, false);
     };
   }, [showFolderModal, showSearch, selectedPost, activeCategory, activeTab]);
-
-  // Audio Play toggle
-  const toggleMusic = () => {
-    if (audioRef.current) {
-      audioRef.current.volume = 0.8; // Громкость 80%
-      if (isMusicPlaying) {
-        audioRef.current.pause();
-        setIsMusicPlaying(false);
-      } else {
-        audioRef.current.play().catch(e => console.log(e));
-        setIsMusicPlaying(true);
-      }
-    }
-  };
-
-  const handleTrackEnded = () => {
-    setCurrentTrackIndex((prev) => (prev + 1) % playlist.length);
-  };
-
-  const handleTrackError = (e) => {
-    console.log('Audio error:', e);
-    // Move to next track on error to avoid getting stuck
-    handleTrackEnded();
-  };
-
-  // App lifecycle listener
-  useEffect(() => {
-    const onPause = () => {
-      if (audioRef.current && !audioRef.current.paused) {
-        audioRef.current.pause();
-        setIsMusicPlaying(false);
-      }
-    };
-    document.addEventListener("pause", onPause, false);
-    return () => {
-      document.removeEventListener("pause", onPause, false);
-    };
-  }, []);
 
   // Sync state with local storage
   useEffect(() => {
