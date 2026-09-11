@@ -262,60 +262,6 @@ export default function App() {
     };
   }, []);
 
-  // Hardware back button listener for Cordova
-  useEffect(() => {
-    const onBackKeyDown = (e) => {
-      e.preventDefault();
-      
-      if (showFolderModal) {
-        setShowFolderModal(false);
-        return;
-      }
-      
-      if (showSearch) {
-        setShowSearch(false);
-        setSearchKeyword('');
-        return;
-      }
-      
-      if (selectedPost) {
-        setSelectedPost(null);
-        setTimeout(() => {
-          window.scrollTo(0, scrollPositions.current[activeTab] || 0);
-        }, 50);
-        return;
-      }
-      
-      if (activeCategory) {
-        setActiveCategory(null);
-        return;
-      }
-      
-      if (activeTab !== 'feed') {
-        handleTabChange('feed');
-        return;
-      }
-      
-      // We are on the top level of the feed tab
-      const currentTime = new Date().getTime();
-      if (currentTime - backPressTime.current < 2000) {
-        if (navigator.app && navigator.app.exitApp) {
-          navigator.app.exitApp();
-        }
-      } else {
-        setShowExitToast(true);
-        backPressTime.current = currentTime;
-      }
-    };
-
-    document.addEventListener("backbutton", onBackKeyDown, false);
-    return () => {
-      document.removeEventListener("backbutton", onBackKeyDown, false);
-    };
-  }, [showFolderModal, showSearch, selectedPost, activeCategory, activeTab]);
-
-  // Audio Play toggle
-
   // Sync state with local storage
   useEffect(() => {
     localStorage.setItem('favorites', JSON.stringify(favorites));
@@ -620,12 +566,12 @@ export default function App() {
           window.cordova.base64ToGallery(
             base64Clean,
             { prefix: 'comics_', mediaScanner: true },
-            (path) => showToast("Сохранено в галерею!"),
+            (_path) => showToast("Сохранено в галерею!"),
             (err) => showToast("Ошибка сохранения: " + err)
           );
         };
         reader.readAsDataURL(blob);
-      } catch (err) {
+      } catch (_err) {
         showToast("Ошибка при скачивании файла.");
       }
     };
@@ -656,14 +602,14 @@ export default function App() {
                 } else {
                   showToast("Разрешение отклонено. Невозможно сохранить.");
                 }
-              }, (err) => {
+              }, (_err) => {
                 // Safe fallback: try saving anyway if permission request fails
                 doSave();
               });
             } else {
               doSave();
             }
-          }, (err) => {
+          }, (_err) => {
             // Safe fallback: try saving anyway if permission check fails
             doSave();
           });
@@ -672,7 +618,7 @@ export default function App() {
         } else {
           doSave();
         }
-      } catch (e) {
+      } catch (_e) {
         // Safe fallback: try saving anyway if synchronous exception is thrown
         doSave();
       }
@@ -686,7 +632,7 @@ export default function App() {
         link.click();
         document.body.removeChild(link);
         showToast("Скачивание файла...");
-      } catch (e) {}
+      } catch (_e) {}
     }
   };
 
@@ -695,7 +641,7 @@ export default function App() {
       const link = post.archive_url || `http://comicsbook.ru/post/${post.id}`;
       navigator.clipboard.writeText(link);
       showToast("Ссылка скопирована!");
-    } catch (e) {
+    } catch (_e) {
       showToast("Не удалось скопировать ссылку.");
     }
   };
@@ -868,12 +814,6 @@ export default function App() {
 
   const filteredPosts = getFilteredPosts();
 
-  // Pagination calculations
-  const totalPages = Math.ceil(filteredPosts.length / pageSize);
-  const visiblePosts = paginationEnabled 
-    ? filteredPosts.slice((currentPage - 1) * pageSize, currentPage * pageSize)
-    : filteredPosts.slice(0, displayCount);
-
   // Group categories
   const getCategories = () => {
     const cats = {};
@@ -886,17 +826,6 @@ export default function App() {
   };
 
   const categories = getCategories();
-
-  // Load a random post
-  const triggerRandom = () => {
-    if (posts.length === 0) return;
-    const randomIndex = Math.floor(Math.random() * posts.length);
-    const post = posts[randomIndex];
-    setSelectedPost(post);
-    addToHistory(post.id);
-    setHeaderVisible(true);
-    window.scrollTo(0, 0);
-  };
 
   // Clear data cache options
   const clearCache = (type) => {
