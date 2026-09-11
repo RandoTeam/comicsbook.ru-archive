@@ -3,6 +3,8 @@
   "private": true,
   "version": "1.0.4",
   "type": "module",
+  "author": "RandoTeam <vlasov.rus.mos@gmail.com>",
+  "license": "MIT",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

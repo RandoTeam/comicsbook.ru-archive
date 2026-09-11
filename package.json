@@ -1,4 +1,10 @@
 {
+  "name": "comicsbook-archive-scrapers",
+  "version": "1.0.4",
+  "description": "Scraping and processing pipeline utilities for Comicsbook.ru archive",
+  "author": "RandoTeam <vlasov.rus.mos@gmail.com>",
+  "license": "MIT",
+  "private": true,
   "dependencies": {
     "cheerio": "^1.2.0",
     "puppeteer": "^25.2.1",

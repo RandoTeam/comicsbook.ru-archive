@@ -1,8 +1,8 @@
 {
   "name": "ru.comicsbook.app",
   "displayName": "Comicsbook",
-  "version": "1.0.1",
-  "description": "A sample Apache Cordova application that responds to the deviceready event.",
+  "version": "1.0.4",
+  "description": "Comicsbook.ru offline meme archive Android app",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -10,8 +10,8 @@
   "keywords": [
     "ecosystem:cordova"
   ],
-  "author": "Apache Cordova Team",
-  "license": "Apache-2.0",
+  "author": "RandoTeam <vlasov.rus.mos@gmail.com>",
+  "license": "MIT",
   "devDependencies": {
     "cordova-android": "^15.0.0",
     "cordova-base64-to-gallery": "^4.1.3",

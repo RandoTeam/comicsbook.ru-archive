@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="ru.comicsbook.app" version="1.0.3" android-versionCode="10003" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
+<widget id="ru.comicsbook.app" version="1.0.4" android-versionCode="10004" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
     <name>Comicsbook</name>
     <description>
         Comicsbook.ru offline meme archive.
     </description>
-    <author email="dev@comicsbook.ru" href="http://comicsbook.ru">
-        Comicsbook Team
+    <author email="vlasov.rus.mos@gmail.com" href="https://github.com/RandoTeam/comicsbook.ru-archive">
+        RandoTeam
     </author>
     <content src="index.html" />
     <icon src="icon.png" />
