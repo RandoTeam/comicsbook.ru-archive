@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import Toast from './components/Toast';
 
 import { Icons, getCatGif, getPostImageUrl, handleImageError, brokenImageIds } from './utils/helpers';
@@ -60,6 +60,14 @@ export default function App() {
     return saved && saved !== 'null' ? saved : null;
   });
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchKeyword);
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [searchKeyword]);
   const [showSearch, setShowSearch] = useState(false);
   const [selectedPost, setSelectedPost] = useState(() => {
     const saved = localStorage.getItem('selectedPost');
@@ -690,8 +698,8 @@ export default function App() {
     });
   };
 
-  // Filter and sort posts
-  const getFilteredPosts = () => {
+  // Memoized filter and sort posts with debounced search query
+  const filteredPosts = useMemo(() => {
     let result = [];
     if (activeTab === 'feed' || activeTab === 'search') {
       result = posts.filter(p => !hiddenPosts.includes(p.id));
@@ -726,9 +734,9 @@ export default function App() {
       }
     }
 
-    // Search filter
-    if (searchKeyword && activeTab !== 'history') {
-      const queryWords = searchKeyword.toLowerCase().split(/\s+/).filter(Boolean);
+    // Search filter with debounced query
+    if (debouncedSearch && activeTab !== 'history') {
+      const queryWords = debouncedSearch.toLowerCase().split(/\s+/).filter(Boolean);
       result = result.filter((p) => {
         // Get post comments text
         const postComments = comments[p.id] || [];
@@ -781,12 +789,24 @@ export default function App() {
     }
 
     return result;
-  };
+  }, [
+    posts,
+    comments,
+    activeTab,
+    favorites,
+    history,
+    hiddenPosts,
+    activeFolderId,
+    folders,
+    activeCategory,
+    debouncedSearch,
+    ratingFilter,
+    hideMissingImages,
+    activeSort,
+  ]);
 
-  const filteredPosts = getFilteredPosts();
-
-  // Group categories
-  const getCategories = () => {
+  // Group categories memoized
+  const categories = useMemo(() => {
     const cats = {};
     posts.forEach((p) => {
       if (p.category) {
@@ -794,9 +814,7 @@ export default function App() {
       }
     });
     return Object.entries(cats).sort((a, b) => b[1] - a[1]);
-  };
-
-  const categories = getCategories();
+  }, [posts]);
 
   // Clear data cache options
   const clearCache = (type) => {
