@@ -1,7 +1,7 @@
 {
   "name": "ru.comicsbook.app",
   "displayName": "Comicsbook",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Comicsbook.ru offline meme archive Android app",
   "main": "index.js",
   "scripts": {

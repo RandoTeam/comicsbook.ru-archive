@@ -8,6 +8,8 @@ import BottomNav from './components/BottomNav';
 import FullscreenViewer from './components/FullscreenViewer';
 import FolderModal from './components/FolderModal';
 import ContextMenuModal from './components/ContextMenuModal';
+import MiniAudioPlayer from './components/MiniAudioPlayer';
+import SettingsView from './components/SettingsView';
 import useAudioPlayer from './utils/useAudioPlayer';
 
 export default function App() {
@@ -28,11 +30,21 @@ export default function App() {
   const {
     isMusicPlaying,
     currentTrackIndex,
+    currentTrack,
+    tracks,
     audioRef,
+    volume,
+    setVolume,
+    isMuted,
+    toggleMute,
+    showMiniPlayer,
+    setShowMiniPlayer,
     toggleMusic,
+    playNextTrack,
+    playPrevTrack,
+    selectTrack,
     handleTrackEnded,
     handleTrackError,
-    playlist,
   } = useAudioPlayer();
   const [showExitToast, setShowExitToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
@@ -135,6 +147,10 @@ export default function App() {
     const saved = localStorage.getItem('hideMissingImages');
     return saved ? JSON.parse(saved) : true;
   });
+  const [smoothAnimations, setSmoothAnimations] = useState(() => {
+    const saved = localStorage.getItem('smoothAnimations');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
 
   // NEW: Pagination states
   const [paginationEnabled, setPaginationEnabled] = useState(() => {
@@ -145,7 +161,6 @@ export default function App() {
     const saved = localStorage.getItem('pageSize');
     return saved ? parseInt(saved, 10) : 20;
   });
-  const [currentPage, setCurrentPage] = useState(1);
 
   // NEW: Favorites folders state
   // Folders structure: { id, name, postIds: [] }
@@ -157,9 +172,6 @@ export default function App() {
   const [showFolderModal, setShowFolderModal] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
   const [saveToFolderPost, setSaveToFolderPost] = useState(null); // Post currently being added to a folder
-
-  // Track comments expansion per post
-  const [expandedComments, setExpandedComments] = useState({});
 
   // Restore scroll positions & display counts per tab
   const scrollPositions = useRef(
@@ -342,6 +354,15 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('hideMissingImages', JSON.stringify(hideMissingImages));
   }, [hideMissingImages]);
+
+  useEffect(() => {
+    localStorage.setItem('smoothAnimations', JSON.stringify(smoothAnimations));
+    if (smoothAnimations) {
+      document.body.classList.add('smooth-animations');
+    } else {
+      document.body.classList.remove('smooth-animations');
+    }
+  }, [smoothAnimations]);
 
   useEffect(() => {
     localStorage.setItem('paginationEnabled', JSON.stringify(paginationEnabled));
@@ -836,7 +857,13 @@ export default function App() {
       <Toast message="Нажмите еще раз для выхода" show={showExitToast} onHide={() => setShowExitToast(false)} />
       <Toast message={toastMessage} show={showToastObj} onHide={() => setShowToastObj(false)} />
 
-      <audio ref={audioRef} src={playlist[currentTrackIndex]} onEnded={handleTrackEnded} onError={handleTrackError} autoPlay={isMusicPlaying} />
+      <audio
+        ref={audioRef}
+        src={tracks[currentTrackIndex]?.src || 'audio/track1.m4a'}
+        onEnded={handleTrackEnded}
+        onError={handleTrackError}
+        autoPlay={isMusicPlaying}
+      />
 
       {/* Scroll Progress Bar */}
       {(activeTab === 'feed' || activeTab === 'favorites') && (
@@ -885,11 +912,31 @@ export default function App() {
         )}
         <div className="header-actions">
           <button
+            type="button"
             className={`header-btn ${isMusicPlaying ? 'active-pulse' : ''}`}
-            onClick={toggleMusic}
-            style={{ color: isMusicPlaying ? '#4facfe' : 'inherit' }}
+            onClick={() => {
+              if (!isMusicPlaying && !showMiniPlayer) {
+                toggleMusic();
+              } else {
+                setShowMiniPlayer((v) => !v);
+              }
+            }}
+            title={isMusicPlaying ? 'Управление плеером' : 'Включить музыку'}
+            style={{
+              color: isMusicPlaying ? '#4facfe' : 'inherit',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+            }}
           >
             <Icons.Music />
+            {isMusicPlaying && (
+              <div className="equalizer-bars playing" style={{ height: '14px', width: '14px' }}>
+                <span className="eq-bar eq-bar-1" style={{ width: '2px' }} />
+                <span className="eq-bar eq-bar-2" style={{ width: '2px' }} />
+                <span className="eq-bar eq-bar-3" style={{ width: '2px' }} />
+              </div>
+            )}
           </button>
         </div>
       </header>
@@ -1222,139 +1269,59 @@ export default function App() {
 
             {/* Settings Page */}
             {activeTab === 'settings' && (
-              <div style={{ paddingBottom: '30px' }}>
-                <div className="settings-section-title">Оформление</div>
-                <div className="settings-section">
-                  <div className="setting-row">
-                    <span>Тема оформления</span>
-                    <select value={theme} onChange={(e) => setTheme(e.target.value)}>
-                      <option value="light">Светлая</option>
-                      <option value="dark">Тёмная</option>
-                      <option value="oled">Черная (OLED)</option>
-                    </select>
-                  </div>
-                  <div className="setting-row">
-                    <span>Размер шрифта</span>
-                    <select
-                      value={fontSize}
-                      onChange={(e) => setFontSize(e.target.value)}
-                    >
-                      <option value="small">Мелкий</option>
-                      <option value="medium">Средний</option>
-                      <option value="large">Крупный</option>
-                    </select>
-                  </div>
-                  <div className="setting-row">
-                    <span>Вид ленты</span>
-                    <select
-                      value={viewMode}
-                      onChange={(e) => setViewMode(e.target.value)}
-                    >
-                      <option value="cards">Карточки (Полный)</option>
-                      <option value="compact">Компактный (Список)</option>
-                    </select>
-                  </div>
-                  <div className="setting-row">
-                    <span>Скрывать посты без картинок</span>
-                    <input
-                      type="checkbox"
-                      checked={hideMissingImages}
-                      onChange={(e) => setHideMissingImages(e.target.checked)}
-                      style={{ width: '20px', height: '20px', cursor: 'pointer' }}
-                    />
-                  </div>
-                </div>
-
-                <div className="settings-section-title">Режим просмотра</div>
-                <div className="settings-section">
-                  <div className="setting-row">
-                    <span>Постраничная навигация (вместо бесконечной)</span>
-                    <input
-                      type="checkbox"
-                      checked={paginationEnabled}
-                      onChange={(e) => setPaginationEnabled(e.target.checked)}
-                      style={{ width: '20px', height: '20px', cursor: 'pointer' }}
-                    />
-                  </div>
-                  {paginationEnabled && (
-                    <div className="setting-row" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                        <span>Постов на страницу:</span>
-                        <span style={{ fontWeight: 'bold', color: 'var(--badge-text)' }}>{pageSize}</span>
-                      </div>
-                      <input
-                        type="range"
-                        min="5"
-                        max="50"
-                        step="5"
-                        value={pageSize}
-                        onChange={(e) => {
-                          const steps = [5, 10, 20, 30, 40, 50];
-                          const val = parseInt(e.target.value, 10);
-                          // Match closest step
-                          const closest = steps.reduce((prev, curr) => Math.abs(curr - val) < Math.abs(prev - val) ? curr : prev);
-                          setPageSize(closest);
-                        }}
-                      />
-                    </div>
-                  )}
-                </div>
-
-                <div className="settings-section-title">Фильтрация</div>
-                <div className="settings-section">
-                  <div className="setting-row" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                      <span>Минимальный рейтинг:</span>
-                      <span style={{ fontWeight: 'bold', color: 'var(--badge-text)' }}>
-                        {ratingFilter === -999999 ? 'Все посты' : `от ${ratingFilter}`}
-                      </span>
-                    </div>
-                    <input
-                      type="range"
-                      min="-500"
-                      max="5000"
-                      step="50"
-                      value={ratingFilter === -999999 ? -500 : ratingFilter}
-                      onChange={(e) => {
-                        const val = parseInt(e.target.value, 10);
-                        setRatingFilter(val <= -500 ? -999999 : val);
-                      }}
-                    />
-                  </div>
-                </div>
-
-                <div className="settings-section-title">Локальные данные</div>
-                <div className="settings-section">
-                  <div
-                    className="setting-row"
-                    style={{ cursor: 'pointer', color: '#ff3347' }}
-                    onClick={() => clearCache('history')}
-                  >
-                    <span>Очистить историю просмотров</span>
-                    <Icons.Trash />
-                  </div>
-                  <div
-                    className="setting-row"
-                    style={{ cursor: 'pointer', color: '#ff3347' }}
-                    onClick={() => clearCache('favorites')}
-                  >
-                    <span>Очистить избранное</span>
-                    <Icons.Trash />
-                  </div>
-                  <div
-                    className="setting-row"
-                    style={{ cursor: 'pointer', color: '#ff3347' }}
-                    onClick={() => clearCache('likes')}
-                  >
-                    <span>Сбросить оценки</span>
-                    <Icons.Trash />
-                  </div>
-                </div>
-              </div>
+              <SettingsView
+                theme={theme}
+                setTheme={setTheme}
+                fontSize={fontSize}
+                setFontSize={setFontSize}
+                viewMode={viewMode}
+                setViewMode={setViewMode}
+                smoothAnimations={smoothAnimations}
+                setSmoothAnimations={setSmoothAnimations}
+                hideMissingImages={hideMissingImages}
+                setHideMissingImages={setHideMissingImages}
+                totalPostsCount={posts.length}
+                paginationEnabled={paginationEnabled}
+                setPaginationEnabled={setPaginationEnabled}
+                pageSize={pageSize}
+                setPageSize={setPageSize}
+                ratingFilter={ratingFilter}
+                setRatingFilter={setRatingFilter}
+                isMusicPlaying={isMusicPlaying}
+                toggleMusic={toggleMusic}
+                currentTrackIndex={currentTrackIndex}
+                tracks={tracks}
+                selectTrack={selectTrack}
+                playNextTrack={playNextTrack}
+                playPrevTrack={playPrevTrack}
+                volume={volume}
+                setVolume={setVolume}
+                isMuted={isMuted}
+                toggleMute={toggleMute}
+                onClearCache={clearCache}
+              />
             )}
           </>
         )}
       </div>
+
+      {/* Floating Mini Audio Player */}
+      {showMiniPlayer && (
+        <MiniAudioPlayer
+          isPlaying={isMusicPlaying}
+          currentTrack={currentTrack}
+          currentTrackIndex={currentTrackIndex}
+          totalTracks={tracks.length}
+          volume={volume}
+          isMuted={isMuted}
+          onTogglePlay={toggleMusic}
+          onPrevTrack={playPrevTrack}
+          onNextTrack={playNextTrack}
+          onVolumeChange={setVolume}
+          onToggleMute={toggleMute}
+          onClose={() => setShowMiniPlayer(false)}
+        />
+      )}
 
       {/* Bottom Navigation (Always visible for easy tab switching!) */}
       <BottomNav activeTab={activeTab} selectedPost={selectedPost} onTabChange={handleTabChange} />

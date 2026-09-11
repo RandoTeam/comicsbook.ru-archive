@@ -127,6 +127,46 @@ export const Icons = {
       <polyline points="7 10 12 15 17 10" />
       <line x1="12" y1="15" x2="12" y2="3" />
     </svg>
+  ),
+  Play: (props) => (
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" {...props}>
+      <path d="M8 5v14l11-7z" />
+    </svg>
+  ),
+  Pause: (props) => (
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" {...props}>
+      <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+    </svg>
+  ),
+  SkipNext: (props) => (
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" {...props}>
+      <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
+    </svg>
+  ),
+  SkipPrev: (props) => (
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" {...props}>
+      <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z" />
+    </svg>
+  ),
+  VolumeUp: (props) => (
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" {...props}>
+      <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" />
+    </svg>
+  ),
+  VolumeMute: (props) => (
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" {...props}>
+      <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27l4.73 4.73H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z" />
+    </svg>
+  ),
+  Close: (props) => (
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" {...props}>
+      <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+    </svg>
+  ),
+  Info: (props) => (
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" {...props}>
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
+    </svg>
   )
 };
 
@@ -149,18 +189,28 @@ export const getPostImageUrl = (post) => {
   if (post.category === 'ВКонтакте' && post.image_url) {
     return post.image_url;
   }
-  return `upload/${post.filename}`;
+  if (post.filename) {
+    return `upload/${post.filename}`;
+  }
+  return '';
 };
 
 export const brokenImageIds = new Set();
 export const handleImageError = (e, post) => {
   if (!post || !post.image_url) return;
-  if (e.target.dataset.fallback) {
+  if (e.target.dataset.fallbackStage === 'wayback') {
     brokenImageIds.add(post.id);
     window.dispatchEvent(new Event('brokenImagesUpdated'));
     return;
   }
-  e.target.dataset.fallback = 'true';
+  if (!e.target.dataset.fallbackStage && post.filename) {
+    e.target.dataset.fallbackStage = 'format_alt';
+    if (post.filename.endsWith('.avif')) {
+      e.target.src = `upload/${post.filename.replace(/\.avif$/, '.webp')}`;
+      return;
+    }
+  }
+  e.target.dataset.fallbackStage = 'wayback';
   const isFullUrl = post.image_url.startsWith('http://') || post.image_url.startsWith('https://');
   const originalUrl = isFullUrl ? post.image_url : `http://comicsbook.ru${post.image_url}`;
   const waybackUrl = `https://web.archive.org/web/${post.timestamp}im_/${originalUrl}`;

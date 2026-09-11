@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/RandoTeam/comicsbook.ru-archive/releases"><img src="https://img.shields.io/badge/Release-v1.0.5-007ACC?style=for-the-badge&logo=android&logoColor=white" alt="Latest Release"/></a>
+  <a href="https://github.com/RandoTeam/comicsbook.ru-archive/releases"><img src="https://img.shields.io/badge/Release-v1.0.6-007ACC?style=for-the-badge&logo=android&logoColor=white" alt="Latest Release"/></a>
   <a href="#-поддержка-соло-разработчика--support-the-solo-developer"><img src="https://img.shields.io/badge/Support-Solo%20Dev-FF5E5B?style=for-the-badge&logo=ko-fi&logoColor=white" alt="Support Solo Dev"/></a>
   <img src="https://img.shields.io/badge/Platform-Android%20%7C%20Web%20%7C%20Desktop-2ea44f?style=for-the-badge" alt="Platform"/>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-lightgrey?style=for-the-badge" alt="License"/></a>
@@ -25,8 +25,8 @@
   <img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python 3"/>
   <img src="https://img.shields.io/badge/Flask-Local%20Server-000000?style=flat-square&logo=flask&logoColor=white" alt="Flask"/>
   <img src="https://img.shields.io/badge/SQLite-Offline%20DB-003B57?style=flat-square&logo=sqlite&logoColor=white" alt="SQLite"/>
-  <img src="https://img.shields.io/badge/Image%20Format-WebP%20(Quality%2085)-FF6F00?style=flat-square" alt="WebP Format"/>
-  <img src="https://img.shields.io/badge/Audio-M4A%20%2F%20AAC-brightgreen?style=flat-square" alt="Audio Format"/>
+  <img src="https://img.shields.io/badge/Image%20Format-WebP%20%2F%20AVIF-FF6F00?style=flat-square" alt="WebP / AVIF Format"/>
+  <img src="https://img.shields.io/badge/Audio-M4A%20%2F%20AAC%20Player-brightgreen?style=flat-square" alt="Audio Player"/>
 </p>
 
 <br>
