@@ -6,6 +6,8 @@ import VirtualFeed from './components/VirtualFeed';
 import SkeletonLoading from './components/SkeletonLoading';
 import BottomNav from './components/BottomNav';
 import FullscreenViewer from './components/FullscreenViewer';
+import FolderModal from './components/FolderModal';
+import ContextMenuModal from './components/ContextMenuModal';
 
 export default function App() {
   // DB state
@@ -1381,169 +1383,42 @@ export default function App() {
         </button>
       )}
 
-      {/* MODAL 1: Create custom folder */}
-      {showFolderModal && (
-        <div className="modal-overlay" onClick={() => setShowFolderModal(false)} style={{ zIndex: 3000 }}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ padding: '20px' }}>
-            <h3 style={{ margin: '0 0 16px 0', fontSize: '17px' }}>Создать новую папку</h3>
-            <input 
-              type="text" 
-              placeholder="Название папки..." 
-              value={newFolderName}
-              onChange={(e) => setNewFolderName(e.target.value)}
-              style={{ width: '100%', padding: '10px 14px', border: '1px solid var(--border-color)', borderRadius: '8px', boxSizing: 'border-box', background: 'var(--card-bg)', color: 'var(--text-color)', outline: 'none', marginBottom: '20px' }}
-            />
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-              <button onClick={() => setShowFolderModal(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontWeight: 'bold' }}>Отмена</button>
-              <button onClick={createFolder} style={{ background: 'var(--tab-active)', border: 'none', color: 'white', padding: '8px 16px', borderRadius: '18px', fontWeight: 'bold', cursor: 'pointer' }}>Создать</button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Folder Modals */}
+      <FolderModal
+        showCreateModal={showFolderModal}
+        newFolderName={newFolderName}
+        setNewFolderName={setNewFolderName}
+        onCreateFolder={createFolder}
+        onCloseCreate={() => setShowFolderModal(false)}
+        saveToFolderPost={saveToFolderPost}
+        folders={folders}
+        isFavorite={saveToFolderPost ? favorites.includes(saveToFolderPost.id) : false}
+        onToggleFavorite={toggleFavorite}
+        onAddToFolder={addPostToFolder}
+        onCloseSelect={() => setSaveToFolderPost(null)}
+      />
 
-      {/* MODAL 2: Add post to folder selection */}
-      {saveToFolderPost && (
-        <div className="modal-overlay" onClick={() => setSaveToFolderPost(null)} style={{ zIndex: 3000 }}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ padding: '20px', maxWidth: '400px' }}>
-            <h3 style={{ margin: '0 0 16px 0', fontSize: '17px' }}>Добавить в избранное</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <div 
-                onClick={() => {
-                  toggleFavorite(saveToFolderPost.id);
-                  setSaveToFolderPost(null);
-                }}
-                style={{ padding: '12px', background: 'var(--badge-bg)', borderRadius: '8px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-              >
-                <span style={{ fontWeight: '600' }}>Все избранное (без папки)</span>
-                {favorites.includes(saveToFolderPost.id) && <Icons.StarFilled style={{ color: '#f7a823' }} />}
-              </div>
-              
-              {folders.map(f => {
-                const inFolder = f.postIds.includes(saveToFolderPost.id);
-                return (
-                  <div 
-                    key={f.id}
-                    onClick={() => addPostToFolder(saveToFolderPost.id, f.id)}
-                    style={{ padding: '12px', background: 'var(--badge-bg)', borderRadius: '8px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-                  >
-                    <span>Папка: {f.name}</span>
-                    {inFolder && <Icons.StarFilled style={{ color: '#f7a823' }} />}
-                  </div>
-                );
-              })}
-              
-              {favorites.includes(saveToFolderPost.id) && (
-                <button 
-                  onClick={() => {
-                    toggleFavorite(saveToFolderPost.id);
-                    setSaveToFolderPost(null);
-                  }}
-                  style={{ marginTop: '10px', background: '#ff3347', color: 'white', border: 'none', padding: '10px', borderRadius: '18px', fontWeight: 'bold', cursor: 'pointer' }}
-                >
-                  Удалить из избранного
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-      {/* Context Menu Overlay */}
-      {contextMenuPost && (
-        <dialog 
-          ref={dialogRef}
-          className="context-menu-dialog"
-          onClick={(e) => {
-            if (e.target === dialogRef.current) {
-               setContextMenuPost(null);
-            }
-          }}
-        >
-          <div className="context-menu-container">
-            <div className="context-menu-preview">
-              <img src={contextMenuPost.category === 'ВКонтакте' && contextMenuPost.image_url ? contextMenuPost.image_url : `upload/${contextMenuPost.filename}`} alt="" />
-            </div>
-            <div className="context-menu-options">
-              <button 
-                className="context-option"
-                onClick={() => {
-                  setFullscreenPost(contextMenuPost);
-                  setContextMenuPost(null);
-                }}
-              >
-                <Icons.Fullscreen className="option-icon" /> На весь экран
-              </button>
-              
-              <button 
-                className="context-option"
-                onClick={() => {
-                  copyImageToClipboard(contextMenuPost);
-                  setContextMenuPost(null);
-                }}
-              >
-                <Icons.Copy className="option-icon" /> Скопировать
-              </button>
-              
-              <button 
-                className="context-option"
-                onClick={() => {
-                  saveImageToGallery(contextMenuPost);
-                  setContextMenuPost(null);
-                }}
-              >
-                <Icons.Download className="option-icon" /> Сохранить в галерею
-              </button>
-
-              <button 
-                className="context-option"
-                onClick={() => {
-                  const isFav = favorites.includes(contextMenuPost.id);
-                  toggleFavorite(contextMenuPost.id);
-                  showToast(isFav ? "Удалено из избранного" : "Добавлено в избранное");
-                  setContextMenuPost(null);
-                }}
-              >
-                {favorites.includes(contextMenuPost.id) ? (
-                  <Icons.StarFilled className="option-icon" style={{ color: '#f7a823' }} />
-                ) : (
-                  <Icons.StarOutline className="option-icon" />
-                )}
-                {favorites.includes(contextMenuPost.id) ? "В избранном" : "В избранное"}
-              </button>
-
-              <button 
-                className="context-option"
-                onClick={() => {
-                  setSaveToFolderPost(contextMenuPost);
-                  setContextMenuPost(null);
-                }}
-              >
-                <Icons.FolderAdd className="option-icon" /> Добавить в папку...
-              </button>
-
-              <button 
-                className="context-option"
-                onClick={() => {
-                  copyPostLink(contextMenuPost);
-                  setContextMenuPost(null);
-                }}
-              >
-                <Icons.Share className="option-icon" /> Поделиться ссылкой
-              </button>
-
-              <button 
-                className="context-option danger"
-                onClick={() => {
-                  setHiddenPosts(prev => [...prev, contextMenuPost.id]);
-                  showToast("Пост скрыт из ленты");
-                  setContextMenuPost(null);
-                }}
-              >
-                <Icons.Hide className="option-icon" /> Скрыть этот мем
-              </button>
-            </div>
-          </div>
-        </dialog>
-      )}
+      {/* Context Menu Modal */}
+      <ContextMenuModal
+        post={contextMenuPost}
+        dialogRef={dialogRef}
+        onClose={() => setContextMenuPost(null)}
+        onFullscreen={(post) => setFullscreenPost(post)}
+        onCopyImage={copyImageToClipboard}
+        onSaveToGallery={saveImageToGallery}
+        isFavorite={contextMenuPost ? favorites.includes(contextMenuPost.id) : false}
+        onToggleFavorite={(id) => {
+          const isFav = favorites.includes(id);
+          toggleFavorite(id);
+          showToast(isFav ? "Удалено из избранного" : "Добавлено в избранное");
+        }}
+        onOpenFolderSelect={(post) => setSaveToFolderPost(post)}
+        onCopyLink={copyPostLink}
+        onHidePost={(id) => {
+          setHiddenPosts(prev => [...prev, id]);
+          showToast("Пост скрыт из ленты");
+        }}
+      />
 
       {/* Fullscreen Viewer Overlay */}
       {fullscreenPost && (
