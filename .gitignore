@@ -29,7 +29,27 @@ cordova_app/node_modules/
 # Ignore generated database json
 cordova_app/www/data.json
 react_app/public/data.json
-screen*.png
+
+# Android build signatures, dumps & logs
+*.idsig
+logcat*.txt
 logcat_dump.txt
+exec_out.txt
+error_response.txt
+*.diff
+*.patch
+
+# Scraper HTML & test dumps
+sample_*.html
+temp_*.html
+pikabu_test*.html
+post_*.html
+test_encoding.json
+data_extracted_*.json
+snscrape_*.json
 scratch_cdx_images.json
 rewrite.py
+
+# Screenshots & captures
+vk_*.png
+screen*.png
