@@ -5,6 +5,7 @@ import { Icons, getCatGif, getPostImageUrl, handleImageError, brokenImageIds } f
 import VirtualFeed from './components/VirtualFeed';
 import SkeletonLoading from './components/SkeletonLoading';
 import BottomNav from './components/BottomNav';
+import FullscreenViewer from './components/FullscreenViewer';
 
 export default function App() {
   // DB state
@@ -1546,15 +1547,24 @@ export default function App() {
 
       {/* Fullscreen Viewer Overlay */}
       {fullscreenPost && (
-        <div className="fullscreen-overlay" onClick={() => setFullscreenPost(null)}>
-          <button className="fullscreen-close" onClick={() => setFullscreenPost(null)}>×</button>
-          <img 
-            className="fullscreen-img" 
-            src={getPostImageUrl(fullscreenPost)} 
-            alt="" 
-            onClick={(e) => e.stopPropagation()} 
-          />
-        </div>
+        <FullscreenViewer
+          post={fullscreenPost}
+          onClose={() => setFullscreenPost(null)}
+          onPrev={() => {
+            const idx = filteredPosts.findIndex(p => p.id === fullscreenPost.id);
+            if (idx > 0) setFullscreenPost(filteredPosts[idx - 1]);
+          }}
+          onNext={() => {
+            const idx = filteredPosts.findIndex(p => p.id === fullscreenPost.id);
+            if (idx !== -1 && idx < filteredPosts.length - 1) setFullscreenPost(filteredPosts[idx + 1]);
+          }}
+          hasPrev={filteredPosts.findIndex(p => p.id === fullscreenPost.id) > 0}
+          hasNext={filteredPosts.findIndex(p => p.id === fullscreenPost.id) < filteredPosts.length - 1}
+          isFavorite={favorites.includes(fullscreenPost.id)}
+          onToggleFavorite={(id) => toggleFavorite(id)}
+          onSaveToGallery={(p) => saveImageToGallery(p)}
+          onShare={(p) => copyPostLink(p)}
+        />
       )}
     </div>
   );
