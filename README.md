@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/RandoTeam/comicsbook.ru-archive/releases"><img src="https://img.shields.io/badge/Release-v1.0.4-007ACC?style=for-the-badge&logo=android&logoColor=white" alt="Latest Release"/></a>
+  <a href="https://github.com/RandoTeam/comicsbook.ru-archive/releases"><img src="https://img.shields.io/badge/Release-v1.0.5-007ACC?style=for-the-badge&logo=android&logoColor=white" alt="Latest Release"/></a>
   <a href="#-поддержка-соло-разработчика--support-the-solo-developer"><img src="https://img.shields.io/badge/Support-Solo%20Dev-FF5E5B?style=for-the-badge&logo=ko-fi&logoColor=white" alt="Support Solo Dev"/></a>
   <img src="https://img.shields.io/badge/Platform-Android%20%7C%20Web%20%7C%20Desktop-2ea44f?style=for-the-badge" alt="Platform"/>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-lightgrey?style=for-the-badge" alt="License"/></a>
