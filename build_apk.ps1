@@ -5,14 +5,20 @@ npm run build
 
 cd C:\G_3.1\comicsbook
 if (Test-Path "upload") {
-    Copy-Item -Path "upload" -Destination "cordova_app\www\upload" -Recurse -Force
+    New-Item -ItemType Directory -Path "cordova_app\www\upload" -Force | Out-Null
+    Copy-Item -Path "upload\*" -Destination "cordova_app\www\upload" -Recurse -Force
     Write-Host "Images copied to www/upload." -ForegroundColor Green
 }
 
-Write-Host "--- 2. Syncing Version Information ---" -ForegroundColor Cyan
+Write-Host "--- 2. Syncing Assets with Cordova Prepare ---" -ForegroundColor Cyan
+cd C:\G_3.1\comicsbook\cordova_app
+npx cordova prepare android
+
+cd C:\G_3.1\comicsbook
+Write-Host "--- 3. Syncing Version Information ---" -ForegroundColor Cyan
 python update_version.py
 
-Write-Host "--- 3. Compiling Android APK with Gradle ---" -ForegroundColor Cyan
+Write-Host "--- 4. Compiling Android APK with Gradle ---" -ForegroundColor Cyan
 $env:PATH = "C:\Users\Ilia V\.gradle\wrapper\dists\gradle-8.11.1-bin\bpt9gzteqjrbo1mjrsomdt32c\gradle-8.11.1\bin;" + $env:PATH
 cd cordova_app\platforms\android
 .\gradlew.bat assembleRelease
